@@ -57,8 +57,8 @@ class Player:
         return self.drawn_number
 
 class Virtual_Player(Player):
-    def virtual_move():
-        print("funkcja sama wybiera który pionek przesunąć")
+    def virtual_move(self):
+        self.chosen_counter = random.randint(1, 4)
 
 class Ludo:
     def __init__(self):
@@ -69,12 +69,30 @@ class Ludo:
         self.in_dock = 4
         self.counters_pictures = []
         self.chosen_color = ""
+        self.hide_roll_button = NORMAL
+        self.hide_select_button = NORMAL
+        self.dice_unknown = True
         self.chosen_type = ""
         self.chosen_index = 0
         self.images_names_dict = {"red":"red_counter.png",
                                   "yellow":"yellow_counter.png",
                                   "green":"green_counter.png",
                                   "blue":"blue_counter.png"}
+
+    def update_dice_img(self):
+        if self.chosen_type == "real":
+            #roll_label = Label(text=self.real_player[self.chosen_index].roll)
+            roll_label = Label(image=dice[self.real_player[self.chosen_index].roll - 1])
+            self.hide_roll_button = NORMAL
+        else:
+            #roll_label = Label(text=self.virtual_player[self.chosen_index].roll)
+            roll_label = Label(image=dice[self.virtual_player[self.chosen_index].roll - 1])
+            self.hide_roll_button = DISABLED
+
+        if self.dice_unknown == True:
+            roll_label = Label(image=dice_unknown)
+        
+        roll_label.grid(column=0, row=2)
 
     def next_color(self):
         if self.chosen_color == "":
@@ -126,7 +144,7 @@ class Ludo:
                     self.chosen_color = self.virtual_player[0].color
                     self.chosen_index = 0
                     self.chosen_type = "virtual"
-
+        
     def add_player(self, color, is_real, nickname, window):
         if len(self.real_player)+len(self.virtual_player) < 4:
             if color in self.colors:
@@ -149,8 +167,8 @@ class Ludo:
             players_number_label.grid(row=6+x, column=0, columnspan=2)
 
         for y in range(len(self.virtual_player)):
-            virtual_number_label = Label(window, text=f"[{y}]: {self.virtual_player[x].nickname}, Virtual {self.virtual_player[x].color}")
-            virtual_number_label.grid(row=6+len(self.real_player)+x, column=0, columnspan=2)
+            virtual_number_label = Label(window, text=f"[{y}]: {self.virtual_player[y].nickname}, Virtual {self.virtual_player[y].color}")
+            virtual_number_label.grid(row=6+len(self.real_player)+y, column=0, columnspan=2)
 
     def dice(self):
         roll = random.randint(1, 6)
@@ -158,7 +176,10 @@ class Ludo:
             self.real_player[self.chosen_index].roll = roll
         else:
             self.virtual_player[self.chosen_index].roll = roll
-        self.next_color()
+        self.dice_unknown = False
+        self.update_dice_img()
+        self.hide_select_button = NORMAL
+        self.hide_roll_button = DISABLED
         self.side_panel()
 
     def select_counter(self, select):
@@ -169,12 +190,16 @@ class Ludo:
                       self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position, 
                       self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].color)
         else:
-            self.virtual_player[self.chosen_index].chosen_counter = select
-            print(f"SELECTED COUNTER = {select} || TYPE = {self.chosen_type} || ROLL = {self.virtual_player[self.chosen_index].roll} || POSITION X = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position[0]} Y = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position[0]} || COLOR = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color}")
+            self.virtual_player[self.chosen_index].virtual_move()
+            print(f"SELECTED COUNTER = {self.virtual_player[self.chosen_index].chosen_counter} || TYPE = {self.chosen_type} || ROLL = {self.virtual_player[self.chosen_index].roll} || POSITION X = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position[0]} Y = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position[0]} || COLOR = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color}")
             self.move(self.virtual_player[self.chosen_index].roll, 
                       self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position, 
                       self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color)
-        
+        self.next_color()
+        self.dice_unknown = True
+        self.side_panel()
+        self.control_game()
+
     def adjust_counter_position(self, counter, select, color):   
         print(f"SELECT = {select}")   
         pad_y = 0
@@ -325,26 +350,55 @@ class Ludo:
                 self.adjust_counter_position(y, i, x.color)
 
     def move(self, roll, position, color):
+        stop = 0
         #Counter is in dock
-        if (position[0] == 2 or position[0] == 3) and (position[1] == 2 or position[1] == 3) and roll == 6: #RED DOCK
-            #RED START POSITION
-            position[0] = 1 #pos[0] => X
-            position[1] = 5 #pos[1] => Y
-        elif (position[0] == 2 or position[0] == 3) and (position[1] == 9 or position[1] == 10) and roll == 6: #YELLOW DOCK
-            #YELLOW START POSITION
-            position[0] = 5
-            position[1] = 11
-        elif (position[0] == 9 or position[0] == 10) and (position[1] == 2 or position[1] == 3) and roll == 6: #BLUE DOCK
+        if (position[0] == 2 or position[0] == 3) and (position[1] == 2 or position[1] == 3): #RED DOCK
+            if roll == 6:
+                #RED START POSITION
+                position[0] = 1 #pos[0] => X
+                position[1] = 5 #pos[1] => Y
+                if self.chosen_type == "real":
+                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                else:
+                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
+            else:
+                stop = 1
+        elif (position[0] == 2 or position[0] == 3) and (position[1] == 9 or position[1] == 10): #YELLOW DOCK
+            if roll == 6:
+                #YELLOW START POSITION
+                position[0] = 5
+                position[1] = 11
+                if self.chosen_type == "real":
+                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                else:
+                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
+            else:
+                stop = 1
+        elif (position[0] == 9 or position[0] == 10) and (position[1] == 2 or position[1] == 3): #BLUE DOCK
+            if roll == 6:
             #BLUE START POSITION
-            position[0] = 7
-            position[1] = 1
-        elif (position[0] == 9 or position[0] == 10) and (position[1] == 9 or position[1] == 10) and roll == 6: #GREEN DOCK
-            #GREEN START POSITION
-            position[0] = 11
-            position[1] = 7
+                position[0] = 7
+                position[1] = 1
+                if self.chosen_type == "real":
+                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                else:
+                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
+            else:
+                stop = 1
+        elif (position[0] == 9 or position[0] == 10) and (position[1] == 9 or position[1] == 10): #GREEN DOCK
+            if roll == 6:
+                #GREEN START POSITION
+                position[0] = 11
+                position[1] = 7
+                if self.chosen_type == "real":
+                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                else:
+                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
+            else:
+                stop = 1
         else:
             move = 0
-            while(1): 
+            while(stop == 0): 
                 # ======== MOVE LEFT ======== 
                 if roll == 0:
                     break    
@@ -554,34 +608,43 @@ class Ludo:
             window.destroy()
             window.quit()
 
+    '''
+    def blink_counter(self, select):
+        if self.chosen_color == "red":
+            red_counter[select - 1] = Label(image=img_red_counter_blink)
+        if self.chosen_color == "yellow":
+            yellow_counter[select - 1] = Label(image=img_yellow_counter_blink)
+        if self.chosen_color == "green":
+            green_counter[select - 1] = Label(image=img_green_counter_blink)
+        if self.chosen_color == "blue":
+            blue_counter[select - 1] = Label(image=img_blue_counter_blink)
+    '''
+
     def side_panel(self):
         counter_number = [("1", 1),
                           ("2", 2),
                           ("3", 3),
                           ("4", 4)]
+    
+        button_roll = Button(board, text = "Roll", padx=18, command=self.dice, state=self.hide_roll_button)
+        self.update_dice_img()
 
-        if self.chosen_type == "real":
-            #roll_label = Label(text=self.real_player[self.chosen_index].roll)
-            roll_label = Label(image=dice[self.real_player[self.chosen_index].roll - 1])
-            button_roll = Button(board, text = "Roll", padx=18, command=self.dice)
-        else:
-            #roll_label = Label(text=self.virtual_player[self.chosen_index].roll)
-            roll_label = Label(image=dice[self.virtual_player[self.chosen_index].roll - 1])
-            button_roll = Button(board, text = "Roll", padx=18, command=self.dice, state=DISABLED)
         button_roll.grid(column=0, row=3)
-        roll_label.grid(column=0, row=2)
         chosen_color_label = Label(text=f"Chosen color:\n{self.chosen_color}", bg = self.chosen_color).grid(column=0, row =1)
 
         selected_counter = IntVar()
+        selected_counter.set(1)
         
         i = 0 
         for text, mode in counter_number:
             Radiobutton(board, text=text, variable= selected_counter, value=mode).grid(column=0, row=5 + i)
             i += 1
-        selected_counter.set(counter_number[0])
 
-        choose_counter_button = Button(board, text="Select Counter", command=lambda:self.select_counter(selected_counter.get()))
-        choose_counter_button.grid(column=0, row=9)
+        #choose_counter_button = Button(board, text="Select Counter", command=lambda:self.blink_counter(selected_counter.get()))
+        #choose_counter_button.grid(column=0, row=9)
+
+        choose_counter_button = Button(board, text="Move Counter", state=self.hide_select_button,command=lambda:self.select_counter(selected_counter.get()))
+        choose_counter_button.grid(column=0, row=10)
 
         #Scoreboard
         scoreboard= "Scoreboard:\n"
@@ -628,6 +691,18 @@ class Ludo:
 
         window.mainloop()
 
+    def control_game(self):
+        if self.chosen_type == "virtual":
+            self.hide_roll_button = DISABLED
+            self.hide_select_button = DISABLED
+            self.dice()
+            self.side_panel()
+            time.sleep(15)
+            self.select_counter(0)
+        else:
+            self.hide_select_button = DISABLED
+            self.hide_roll_button = NORMAL
+
     def board_init(self):
         self.boot_menu()
         if len(self.real_player) + len(self.virtual_player) > 0:
@@ -643,6 +718,9 @@ class Ludo:
                     adjust_label.append(Label(board, image=adjust_block).grid(row=i, column=j))
 
             board_label = Label(image=img_board).grid(row=1, column=1, columnspan=11, rowspan=11, pady=0)
+
+
+
             '''
             board.overrideredirect(True)
             board.wm_attributes("-topmost", True)
@@ -665,12 +743,18 @@ class Ludo:
             global blue_counter
             blue_counter = []
 
+            global img_red_counter_blink
+            global img_green_counter_blink
+            global img_yellow_counter_blink
+            global img_blue_counter_blink
+
             global dice_one
             global dice_two
             global dice_three
             global dice_four
             global dice_five
             global dice_six
+            global dice_unknown
             global dice
             dice = []
 
@@ -679,12 +763,18 @@ class Ludo:
             img_yellow_counter = ImageTk.PhotoImage(Image.open("counters/yellow_counter.png"))
             img_blue_counter = ImageTk.PhotoImage(Image.open("counters/blue_counter.png"))
 
+            img_red_counter_blink = ImageTk.PhotoImage(Image.open("counters/red_counter_blink.png"))
+            img_green_counter_blink = ImageTk.PhotoImage(Image.open("counters/green_counter_blink.png"))
+            img_yellow_counter_blink = ImageTk.PhotoImage(Image.open("counters/yellow_counter_blink.png"))
+            img_blue_counter_blink = ImageTk.PhotoImage(Image.open("counters/blue_counter_blink.png"))            
+
             dice_one = ImageTk.PhotoImage(Image.open("dice/dice_one.png"))
             dice_two = ImageTk.PhotoImage(Image.open("dice/dice_two.png"))
             dice_three = ImageTk.PhotoImage(Image.open("dice/dice_three.png"))
             dice_four = ImageTk.PhotoImage(Image.open("dice/dice_four.png"))
             dice_five = ImageTk.PhotoImage(Image.open("dice/dice_five.png"))
             dice_six  = ImageTk.PhotoImage(Image.open("dice/dice_six.png"))       
+            dice_unknown  = ImageTk.PhotoImage(Image.open("dice/dice_unknown.png"))       
 
             dice.append(dice_one)
             dice.append(dice_two)   
@@ -698,10 +788,11 @@ class Ludo:
                 green_counter.append(Label(image=img_green_counter))
                 yellow_counter.append(Label(image=img_yellow_counter))
                 blue_counter.append(Label(image=img_blue_counter))
-
+        
             self.next_color()
             self.update_counters_pos()
             self.side_panel()
+            self.control_game()
 
             button_quit = Button(board, text = "End", command = board.quit).grid(column=0, row = 11)                
 
