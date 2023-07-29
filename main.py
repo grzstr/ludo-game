@@ -346,7 +346,9 @@ class Ludo:
             move = 0
             while(1): 
                 # ======== MOVE LEFT ======== 
-                if (position[0] > 7 and position[1] == 7):
+                if roll == 0:
+                    break    
+                elif (position[0] > 7 and position[1] == 7):
                     if position[0] - roll < 7:
                         roll -= position[0] - 7
                         position[0] = 7
@@ -356,7 +358,7 @@ class Ludo:
                         break
                 elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
                     if position[0] - roll < 0:
-                        roll -= position[0]
+                        roll -= position[0] + 1
                         position[0] = 1
                         
                     else:
@@ -394,6 +396,7 @@ class Ludo:
                         break
                     else:
                         position[0] -= roll
+                        break
 
                 # ======== MOVE RIGHT ======== 
                 elif (position[0] < 5 and position[1] == 5):
@@ -436,13 +439,15 @@ class Ludo:
                         break
                     else:
                         position[0] += roll
+                        break
                 elif position[0] == 5 and position[1] == 6:
                     break
-                elif position[1] == 6 and color =='red':
-                    if 5 - position[0] <= roll:
+                elif position[1] == 6 and position[0] < 5 and color =='red':
+                    if 5 - position[0] < roll:
                         break
                     else:
                         position[0] += roll
+                        break
                 
                 # ======== MOVE UP ======== 
                 elif (position[0] == 5 and position[1] >= 7):
@@ -467,8 +472,8 @@ class Ludo:
                         elif position[1] == 7 and roll > 5:
                                 break
                         else:
-                            roll -= 6 - position[1]
-                            position[1] == 6
+                            roll -= position[1] - 6
+                            position[1] = 6
                     #OTHER SITUATIONS
                     elif position[1] - roll < 5:
                         roll -= position[1] - 5
@@ -485,10 +490,11 @@ class Ludo:
                 elif position[0] == 6 and position[1] == 7:
                     break
                 elif position[0] == 6 and color == "yellow":
-                    if position[1] - 7 <= roll:
+                    if position[1] - 7 < roll:
                         break
                     else:
                         position[1] -= roll
+                        break
 
                 # ======== MOVE DOWN ======== 
                 elif (position[0] == 7 and position[1] <= 5):
@@ -535,7 +541,8 @@ class Ludo:
                         break
                     else:
                         position[1] += roll
-                    
+                        break
+              
         print(f"MOVE => POSITION UPDATE: X = {position[0]} | Y = {position[1]}")
         self.update_counters_pos()
         return position
