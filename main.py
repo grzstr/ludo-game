@@ -1,25 +1,15 @@
 from tkinter import *
-import time
 import random
 from PIL import ImageTk, Image
 
 
 class Counter:
-    def __init__(self, color, number):
+    def __init__(self, color, number, dock_pos):
         self.color = color
         self.position = []
         self.number = number
         self.is_inside = True
-        self.dock_pos = {"red":[[2,2],[3,2],[2,3],[3,3]], 
-                          "blue":[[9,2],[10,2],[9,3],[10,3]], 
-                          "green":[[9,9],[10,9],[9,10],[10,10]], 
-                          "yellow":[[2,9],[3,9],[2,10],[3,10]] }
-        '''
-        self.start_pos = {"red":[1, 5], 
-                          "blue":[7, 1], 
-                          "green":[11, 7], 
-                          "yellow":[5, 11] }
-        '''
+        self.dock_pos = dock_pos
         self.position = self.dock_pos[color][number-1]
         
     def get_position(self):
@@ -33,18 +23,20 @@ class Counter:
         self.position[1] = y
 
 class Player:
-    def __init__(self, color, nickname = "Player"):
+    def __init__(self, color, dock_pos, nickname = "Player"):
         self.counter_number = 4
         self.counters = []
         self.chosen_counter = 1
         self.color = color
+        self.in_dock = 4
+        self.dock_pos = dock_pos
         self.points = 0
         self.drawn_number = 0
         self.nickname = nickname
         self.roll = random.randint(1, 6)
 
         for i in range(1, 5):
-            self.counters.append(Counter(color, i))
+            self.counters.append(Counter(color, i, self.dock_pos))
 
     def add_points(self, point):
         self.points += point
@@ -66,11 +58,9 @@ class Ludo:
         self.colors = ["red", "yellow", "blue", "green"]
         self.used_colors = []
         self.real_player = []
-        self.in_dock = 4
-        self.counters_pictures = []
         self.chosen_color = ""
         self.hide_roll_button = NORMAL
-        self.hide_select_button = NORMAL
+        self.hide_select_button = DISABLED
         self.dice_unknown = True
         self.chosen_type = ""
         self.chosen_index = 0
@@ -78,7 +68,17 @@ class Ludo:
                                   "yellow":"yellow_counter.png",
                                   "green":"green_counter.png",
                                   "blue":"blue_counter.png"}
-
+        
+        self.start_pos = {"red":[1, 5], 
+                          "blue":[7, 1], 
+                          "green":[11, 7], 
+                          "yellow":[5, 11] }
+        
+        self.dock_pos = {"red":[[2,2],[3,2],[2,3],[3,3]], 
+                          "blue":[[9,2],[10,2],[9,3],[10,3]], 
+                          "green":[[9,9],[10,9],[9,10],[10,10]], 
+                          "yellow":[[2,9],[3,9],[2,10],[3,10]] }
+        
     def update_dice_img(self):
         if self.chosen_type == "real":
             #roll_label = Label(text=self.real_player[self.chosen_index].roll)
@@ -154,9 +154,9 @@ class Ludo:
                 else:
                     self.used_colors.append(color)
                     if is_real == True:
-                        self.real_player.append(Player(color, nickname))
+                        self.real_player.append(Player(color, self.dock_pos, nickname))
                     else:
-                        self.virtual_player.append(Virtual_Player(color, nickname))
+                        self.virtual_player.append(Virtual_Player(color, self.dock_pos, nickname))
             else:
                 Error_label = Label(window, text="Wrong color!").grid(row=5, column=0, columnspan=2)
         else:
@@ -167,8 +167,8 @@ class Ludo:
             players_number_label.grid(row=6+x, column=0, columnspan=2)
 
         for y in range(len(self.virtual_player)):
-            virtual_number_label = Label(window, text=f"[{y}]: {self.virtual_player[y].nickname}, Virtual {self.virtual_player[y].color}")
-            virtual_number_label.grid(row=6+len(self.real_player)+y, column=0, columnspan=2)
+            virtual_number_label = Label(window, text=f"[{y+x}]: {self.virtual_player[y].nickname}, Virtual {self.virtual_player[y].color}")
+            virtual_number_label.grid(row=6+x+y, column=0, columnspan=2)
 
     def dice(self):
         roll = random.randint(1, 6)
@@ -197,7 +197,6 @@ class Ludo:
                       self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color)
         self.next_color()
         self.dice_unknown = True
-        self.side_panel()
         self.control_game()
 
     def adjust_counter_position(self, counter, select, color):   
@@ -350,256 +349,259 @@ class Ludo:
                 self.adjust_counter_position(y, i, x.color)
 
     def move(self, roll, position, color):
-        stop = 0
-        #Counter is in dock
-        if (position[0] == 2 or position[0] == 3) and (position[1] == 2 or position[1] == 3): #RED DOCK
-            if roll == 6:
-                #RED START POSITION
-                position[0] = 1 #pos[0] => X
-                position[1] = 5 #pos[1] => Y
-                if self.chosen_type == "real":
-                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+            stop = 0
+            #Counter is in dock
+            if (position[0] == 2 or position[0] == 3) and (position[1] == 2 or position[1] == 3): #RED DOCK
+                if roll == 6:
+                    #RED START POSITION
+                    position[0] = 1 #pos[0] => X
+                    position[1] = 5 #pos[1] => Y
+                    if self.chosen_type == "real":
+                        self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    else:
+                        self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
                 else:
-                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
-            else:
-                stop = 1
-        elif (position[0] == 2 or position[0] == 3) and (position[1] == 9 or position[1] == 10): #YELLOW DOCK
-            if roll == 6:
-                #YELLOW START POSITION
-                position[0] = 5
-                position[1] = 11
-                if self.chosen_type == "real":
-                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    stop = 1
+            elif (position[0] == 2 or position[0] == 3) and (position[1] == 9 or position[1] == 10): #YELLOW DOCK
+                if roll == 6:
+                    #YELLOW START POSITION
+                    position[0] = 5
+                    position[1] = 11
+                    if self.chosen_type == "real":
+                        self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    else:
+                        self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
                 else:
-                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
-            else:
-                stop = 1
-        elif (position[0] == 9 or position[0] == 10) and (position[1] == 2 or position[1] == 3): #BLUE DOCK
-            if roll == 6:
-            #BLUE START POSITION
-                position[0] = 7
-                position[1] = 1
-                if self.chosen_type == "real":
-                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    stop = 1
+            elif (position[0] == 9 or position[0] == 10) and (position[1] == 2 or position[1] == 3): #BLUE DOCK
+                if roll == 6:
+                #BLUE START POSITION
+                    position[0] = 7
+                    position[1] = 1
+                    if self.chosen_type == "real":
+                        self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    else:
+                        self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
                 else:
-                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
-            else:
-                stop = 1
-        elif (position[0] == 9 or position[0] == 10) and (position[1] == 9 or position[1] == 10): #GREEN DOCK
-            if roll == 6:
-                #GREEN START POSITION
-                position[0] = 11
-                position[1] = 7
-                if self.chosen_type == "real":
-                    self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    stop = 1
+            elif (position[0] == 9 or position[0] == 10) and (position[1] == 9 or position[1] == 10): #GREEN DOCK
+                if roll == 6:
+                    #GREEN START POSITION
+                    position[0] = 11
+                    position[1] = 7
+                    if self.chosen_type == "real":
+                        self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
+                    else:
+                        self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
                 else:
-                    self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
+                    stop = 1
             else:
-                stop = 1
-        else:
-            move = 0
-            while(stop == 0): 
-                # ======== MOVE LEFT ======== 
-                if roll == 0:
-                    break    
-                elif (position[0] > 7 and position[1] == 7):
-                    if position[0] - roll < 7:
-                        roll -= position[0] - 7
-                        position[0] = 7
+                move = 0
+                while(stop == 0): 
+                    # ======== MOVE LEFT ======== 
+                    if roll == 0:
+                        break    
+                    elif (position[0] > 7 and position[1] == 7):
+                        if position[0] - roll < 7:
+                            roll -= position[0] - 7
+                            position[0] = 7
 
-                    else:
-                        position[0] -= roll
-                        break
-                elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
-                    if position[0] - roll < 0:
-                        roll -= position[0] + 1
-                        position[0] = 1
-                        
-                    else:
-                        position[0] -= roll
-                        break
-                elif (position[0] > 5 and position[0] <= 7 and position[1] == 11):
-                    #YELLOW VICTOR ROAD ENTER
-                    if position[0] >= 6 and color == 'yellow':
-                        if position[0] == 6 and roll > 4:
-                                break
-                        elif position[0] == 7 and roll > 5:
-                                break
                         else:
-                            roll -= position[0] - 6
-                            position[0] == 6
+                            position[0] -= roll
+                            break
+                    elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
+                        if position[0] - roll < 0:
+                            roll -= position[0] + 1
+                            position[0] = 1
                             
-                    #OTHER SITUATIONS
-                    elif position[0] - roll < 5:
-                        roll -= position[0] - 5
-                        position[0] = 5
-                        
-                    else:
-                        position[0] -= roll
-                        break
-                #GREEN VICTORY ROAD
-                elif (position[0] == 11 and position[1] == 6 and color == 'green'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[0] -= roll
-                elif position[0] == 7 and position[1] == 6:
-                    break
-                elif position[1] == 6 and color == "green":
-                    if position[0] - 7 < roll:
-                        break
-                    else:
-                        position[0] -= roll
-                        break
-
-                # ======== MOVE RIGHT ======== 
-                elif (position[0] < 5 and position[1] == 5):
-                    if position[0] + roll > 5:
-                        roll -= 5 - position[0]
-                        position[0] = 5
-                    else:
-                        position[0] += roll
-                        break                    
-                elif (position[0] >= 7 and position[0] < 11 and position[1] == 5):
-                    if position[0] + roll > 12:
-                        roll -= 11 - position[0]
-                        position[0] = 11
-                    else:
-                        position[0] += roll
-                        break            
-                elif (position[0] >= 5 and position[0] < 7 and position[1] == 1):
-                    #BLUE VICTOR ROAD ENTER
-                    if position[0] <= 6 and color == 'blue':
-                        if position[0] == 6 and roll > 4:
-                                break
-                        elif position[0] == 5 and roll > 5:
-                                break
-                        elif position[0] == 6 and roll <= 4:
-                            position[1] += roll 
+                        else:
+                            position[0] -= roll
+                            break
+                    elif (position[0] > 5 and position[0] <= 7 and position[1] == 11):
+                        #YELLOW VICTOR ROAD ENTER
+                        if position[0] >= 6 and color == 'yellow':
+                            if position[0] == 6 and roll > 4:
+                                    break
+                            elif position[0] == 7 and roll > 5:
+                                    break
+                            else:
+                                roll -= position[0] - 6
+                                position[0] == 6
+                                
+                        #OTHER SITUATIONS
+                        elif position[0] - roll < 5:
+                            roll -= position[0] - 5
+                            position[0] = 5
+                            
+                        else:
+                            position[0] -= roll
+                            break
+                    #GREEN VICTORY ROAD
+                    elif (position[0] == 11 and position[1] == 6 and color == 'green'):
+                        if roll > 4:
                             break
                         else:
-                            roll -= 6 - position[0]
-                            position[0] = 6
-                    #OTHER SITUATIONS
-                    elif position[0] + roll >= 7:
-                        roll -= 7 - position[0]
-                        position[0] = 7
+                            position[0] -= roll
+                    elif position[0] == 7 and position[1] == 6:
+                        break
+                    elif position[1] == 6 and color == "green":
+                        if position[0] - 7 < roll:
+                            break
+                        else:
+                            position[0] -= roll
+                            break
+
+                    # ======== MOVE RIGHT ======== 
+                    elif (position[0] < 5 and position[1] == 5):
+                        if position[0] + roll > 5:
+                            roll -= 5 - position[0]
+                            position[0] = 5
+                        else:
+                            position[0] += roll
+                            break                    
+                    elif (position[0] >= 7 and position[0] < 11 and position[1] == 5):
+                        if position[0] + roll > 12:
+                            roll -= 11 - position[0]
+                            position[0] = 11
+                        else:
+                            position[0] += roll
+                            break            
+                    elif (position[0] >= 5 and position[0] < 7 and position[1] == 1):
+                        #BLUE VICTOR ROAD ENTER
+                        if position[0] <= 6 and color == 'blue':
+                            if position[0] == 6 and roll > 4:
+                                    break
+                            elif position[0] == 5 and roll > 5:
+                                    break
+                            elif position[0] == 6 and roll <= 4:
+                                position[1] += roll 
+                                break
+                            else:
+                                roll -= 6 - position[0]
+                                position[0] = 6
+                        #OTHER SITUATIONS
+                        elif position[0] + roll >= 7:
+                            roll -= 7 - position[0]
+                            position[0] = 7
+                        else:
+                            position[0] += roll
+                            break
+                    #RED VICTORY ROAD
+                    elif (position[0] == 1 and position[1] == 6 and color == 'red'):
+                        if roll > 4:
+                            break
+                        else:
+                            position[0] += roll
+                            break
+                    elif position[0] == 5 and position[1] == 6:
+                        break
+                    elif position[1] == 6 and position[0] < 5 and color =='red':
+                        if 5 - position[0] < roll:
+                            break
+                        else:
+                            position[0] += roll
+                            break
+                    
+                    # ======== MOVE UP ======== 
+                    elif (position[0] == 5 and position[1] >= 7):
+                        if position[1] - roll < 7:
+                            roll -= position[1] - 7
+                            position[1] = 7
+                        else:
+                            position[1] -= roll
+                            break                    
+                    elif (position[0] == 5 and position[1] <= 5):
+                        if position[1] - roll < 0:
+                            roll -= 5 - position[1]
+                            position[1] = 1
+                        else:
+                            position[1] -= roll
+                            break            
+                    elif (position[1] >= 5 and position[1] <= 7 and position[0] == 1):
+                        #RED VICTORY ROAD ENTER
+                        if position[1] >= 6 and color == 'red':
+                            if position[1] == 6 and roll > 4:
+                                    break
+                            elif position[1] == 7 and roll > 5:
+                                    break
+                            else:
+                                roll -= position[1] - 6
+                                position[1] = 6
+                        #OTHER SITUATIONS
+                        elif position[1] - roll < 5:
+                            roll -= position[1] - 5
+                            position[1] = 5
+                        else:
+                            position[1] -= roll
+                            break
+                    #YELLOW VICTORY ROAD
+                    elif (position[0] == 6 and position[1] == 11 and color == 'yellow'):
+                        if roll > 4:
+                            break
+                        else:
+                            position[1] -= roll
+                    elif position[0] == 6 and position[1] == 7:
+                        break
+                    elif position[0] == 6 and color == "yellow":
+                        if position[1] - 7 < roll:
+                            break
+                        else:
+                            position[1] -= roll
+                            break
+
+                    # ======== MOVE DOWN ======== 
+                    elif (position[0] == 7 and position[1] <= 5):
+                        if position[1] + roll > 5:
+                            roll -= 5 - position[1]
+                            position[1] = 5
+                        else:
+                            position[1] += roll
+                            break                    
+                    elif (position[0] == 7 and position[1] >= 7):
+                        if position[1] + roll > 11:
+                            roll -= 11 - position[1]
+                            position[1] = 11
+                        else:
+                            position[1] += roll
+                            break            
+                    elif (position[1] >= 5 and position[1] <= 7 and position[0] == 11):
+                        #GREEN VICTORY ROAD ENTER
+                        if position[1] <= 6 and color == 'green':
+                            if position[1] == 6 and roll > 4:
+                                    break
+                            elif position[1] == 5 and roll > 5:
+                                    break
+                            else:
+                                roll -= position[0] - 6
+                                position[1] == 6
+                        #OTHER SITUATIONS
+                        elif position[1] + roll > 7:
+                            roll -= 7 - position[1]
+                            position[1] = 7
+                        else:
+                            position[1] += roll
+                            break
+                    #BLUE VICTORY ROAD
+                    elif (position[0] == 6 and position[1] == 11 and color == 'blue'):
+                        if roll > 4:
+                            break
+                        else:
+                            position[1] += roll
+                    elif position[0] == 6 and position[1] == 5:
+                        break
+                    elif position[0] == 6 and color == 'blue':
+                        if 5 - position[1] < roll:
+                            break
+                        else:
+                            position[1] += roll
+                            break
                     else:
-                        position[0] += roll
-                        break
-                #RED VICTORY ROAD
-                elif (position[0] == 1 and position[1] == 6 and color == 'red'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[0] += roll
-                        break
-                elif position[0] == 5 and position[1] == 6:
-                    break
-                elif position[1] == 6 and position[0] < 5 and color =='red':
-                    if 5 - position[0] < roll:
-                        break
-                    else:
-                        position[0] += roll
+                        Error_Label = Label(text=f"ERROR! - Cannot move {color} counter number {self.select_counter}! [{position[0], position[1]}]").grid(column=1, row = 12, columnspan=11)
                         break
                 
-                # ======== MOVE UP ======== 
-                elif (position[0] == 5 and position[1] >= 7):
-                    if position[1] - roll < 7:
-                        roll -= position[1] - 7
-                        position[1] = 7
-                    else:
-                        position[1] -= roll
-                        break                    
-                elif (position[0] == 5 and position[1] <= 5):
-                    if position[1] - roll < 0:
-                        roll -= 5 - position[1]
-                        position[1] = 1
-                    else:
-                        position[1] -= roll
-                        break            
-                elif (position[1] >= 5 and position[1] <= 7 and position[0] == 1):
-                    #RED VICTORY ROAD ENTER
-                    if position[1] >= 6 and color == 'red':
-                        if position[1] == 6 and roll > 4:
-                                break
-                        elif position[1] == 7 and roll > 5:
-                                break
-                        else:
-                            roll -= position[1] - 6
-                            position[1] = 6
-                    #OTHER SITUATIONS
-                    elif position[1] - roll < 5:
-                        roll -= position[1] - 5
-                        position[1] = 5
-                    else:
-                        position[1] -= roll
-                        break
-                #YELLOW VICTORY ROAD
-                elif (position[0] == 6 and position[1] == 11 and color == 'yellow'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[1] -= roll
-                elif position[0] == 6 and position[1] == 7:
-                    break
-                elif position[0] == 6 and color == "yellow":
-                    if position[1] - 7 < roll:
-                        break
-                    else:
-                        position[1] -= roll
-                        break
-
-                # ======== MOVE DOWN ======== 
-                elif (position[0] == 7 and position[1] <= 5):
-                    if position[1] + roll > 5:
-                        roll -= 5 - position[1]
-                        position[1] = 5
-                    else:
-                        position[1] += roll
-                        break                    
-                elif (position[0] == 7 and position[1] >= 7):
-                    if position[1] + roll > 11:
-                        roll -= 11 - position[1]
-                        position[1] = 11
-                    else:
-                        position[1] += roll
-                        break            
-                elif (position[1] >= 5 and position[1] <= 7 and position[0] == 11):
-                    #GREEN VICTORY ROAD ENTER
-                    if position[1] <= 6 and color == 'green':
-                        if position[1] == 6 and roll > 4:
-                                break
-                        elif position[1] == 5 and roll > 5:
-                                break
-                        else:
-                            roll -= position[0] - 6
-                            position[1] == 6
-                    #OTHER SITUATIONS
-                    elif position[1] + roll > 7:
-                        roll -= 7 - position[1]
-                        position[1] = 7
-                    else:
-                        position[1] += roll
-                        break
-                #BLUE VICTORY ROAD
-                elif (position[0] == 6 and position[1] == 11 and color == 'blue'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[1] += roll
-                elif position[0] == 6 and position[1] == 5:
-                    break
-                elif position[0] == 6 and color == 'blue':
-                    if 5 - position[1] < roll:
-                        break
-                    else:
-                        position[1] += roll
-                        break
-              
-        print(f"MOVE => POSITION UPDATE: X = {position[0]} | Y = {position[1]}")
-        self.update_counters_pos()
-        return position
+            print(f"MOVE => POSITION UPDATE: X = {position[0]} | Y = {position[1]}")
+            self.update_counters_pos()
+            return position
 
     def close_window(self, window):
         if (len(self.real_player) + len(self.virtual_player)) == 0:
@@ -695,13 +697,15 @@ class Ludo:
         if self.chosen_type == "virtual":
             self.hide_roll_button = DISABLED
             self.hide_select_button = DISABLED
-            self.dice()
             self.side_panel()
-            time.sleep(15)
-            self.select_counter(0)
+            self.dice()
+            board.after(5000, func = self.side_panel())
+            board.after(5000, self.select_counter(0))
+            
         else:
             self.hide_select_button = DISABLED
             self.hide_roll_button = NORMAL
+            self.side_panel()
 
     def board_init(self):
         self.boot_menu()
@@ -791,7 +795,6 @@ class Ludo:
         
             self.next_color()
             self.update_counters_pos()
-            self.side_panel()
             self.control_game()
 
             button_quit = Button(board, text = "End", command = board.quit).grid(column=0, row = 11)                
