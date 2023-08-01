@@ -12,16 +12,8 @@ class Counter:
         self.dock_pos = dock_pos
         self.position = self.dock_pos[color][number-1]
         
-    def get_position(self):
-        return self.position
-    
-    def get_number(self):
-        return self.number
-
-    def set_position(self, x, y):
-        self.position[0] = x
-        self.position[1] = y
-
+    def set_dock_pos(self):
+        self.position = self.dock_pos[color][number-1]
 class Player:
     def __init__(self, color, dock_pos, nickname = "Player"):
         self.counter_number = 4
@@ -30,8 +22,7 @@ class Player:
         self.color = color
         self.in_dock = 4
         self.dock_pos = dock_pos
-        self.points = 0
-        self.drawn_number = 0
+        self.points = 100
         self.nickname = nickname
         self.roll = random.randint(1, 6)
 
@@ -43,10 +34,6 @@ class Player:
 
     def get_points(self):
         return self.points
-
-    def dice(self):
-        self.drawn_number = random.randint(1,6)
-        return self.drawn_number
 
 class Virtual_Player(Player):
     def virtual_move(self):
@@ -62,6 +49,7 @@ class Ludo:
         self.hide_roll_button = NORMAL
         self.hide_select_button = DISABLED
         self.dice_unknown = True
+        self.start_game = False
         self.chosen_type = ""
         self.chosen_index = 0
         self.images_names_dict = {"red":"red_counter.png",
@@ -179,7 +167,8 @@ class Ludo:
         self.dice_unknown = False
         self.update_dice_img()
         self.hide_select_button = NORMAL
-        self.hide_roll_button = DISABLED
+        #self.hide_roll_button = DISABLED
+        self.hide_roll_button = NORMAL
         self.side_panel()
 
     def select_counter(self, select):
@@ -195,7 +184,16 @@ class Ludo:
             self.move(self.virtual_player[self.chosen_index].roll, 
                       self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position, 
                       self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color)
-        self.next_color()
+        
+
+        self.kill()
+        if self.chosen_type == "real":
+            if self.real_player[self.chosen_index].roll != 6:
+                self.next_color()
+        else:
+            if self.virtual_player[self.chosen_index].roll != 6:
+                self.next_color()
+            
         self.dice_unknown = True
         self.control_game()
 
@@ -347,6 +345,30 @@ class Ludo:
             for y in x.counters:
                 i += 1
                 self.adjust_counter_position(y, i, x.color)
+
+    def kill(self):
+        for player in self.real_player:
+            if player.color != self.real_player[self.chosen_index].color and self.chosen_type == "real":
+                for evil_counter in player.counters:
+                    for good_counter in self.real_player[self.chosen_index].counters:
+                        if evil_counter.position[0] == good_counter.position[0] and evil_counter.position[1] == good_counter.position[1]:
+                            #self.real_player[self.chosen_index].counters[evil_counter.number].position[0] =  evil_counter.dock_pos[evil_counter.color][evil_counter.number][0]
+                            #self.real_player[self.chosen_index].counters[evil_counter.number].position[1] =  evil_counter.dock_pos[evil_counter.color][evil_counter.number][1]
+                            self.real_player[self.chosen_index].counters[evil_counter.number].set_dock_pos()
+                            #POINTS
+                            player.points -= 15
+                            self.real_player[self.chosen_index].points += 20
+        for player in self.virtual_player:
+            if player.color != self.virtual_player[self.chosen_index].color and self.chosen_type == "virtual":
+                for evil_counter in player.counters:
+                    for good_counter in self.virtual_player[self.chosen_index].counters:
+                        if evil_counter.position[0] == good_counter.position[0] and evil_counter.position[1] == good_counter.position[1]:
+                            evil_counter.position[0] =  evil_counter.dock_pos[evil_counter.color][evil_counter.number][0]
+                            evil_counter.position[1] =  evil_counter.dock_pos[evil_counter.color][evil_counter.number][1]
+                            #POINTS
+                            player.points -= 15
+                            self.virtual_player[self.chosen_index].points += 20
+
 
     def move(self, roll, position, color):
             stop = 0
@@ -595,6 +617,8 @@ class Ludo:
                         else:
                             position[1] += roll
                             break
+                    elif position[0] > 11 or position[0] < 1 or position[1] > 11 or position[1] < 1: #Error Counter out of the board
+                        Error_Label = Label(text=f"ERROR! - {color} counter {self.select_counter}! [{position[0], position[1]}]. Function try to move counter out of the board").grid(column=1, row = 12, columnspan=11)
                     else:
                         Error_Label = Label(text=f"ERROR! - Cannot move {color} counter number {self.select_counter}! [{position[0], position[1]}]").grid(column=1, row = 12, columnspan=11)
                         break
@@ -607,6 +631,7 @@ class Ludo:
         if (len(self.real_player) + len(self.virtual_player)) == 0:
             M1 = Label(window, text="There are no players!").grid(row=5, column = 0, columnspan=2)
         else:
+            self.start_game = True
             window.destroy()
             window.quit()
 
@@ -657,11 +682,22 @@ class Ludo:
         for player in self.virtual_player:
             p_number += 1
             scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p" + "\n"
-        #score_label = Label(text=scoreboard).grid(row=1, column=12)
+        score_label = Label(text=scoreboard).grid(row=1, column=12)
+
+        #Counters position
+        
+        p_number = 0
+        for player in self.real_player:
+            pos_text= ""
+            for i in range(4):
+                pos_text += f"[{player.color}][{player.counters[i].number}] -> [{player.counters[i].position[0]}, {player.counters[i].position[1]}]\n"
+            pos_label = Label(text=pos_text).grid(row=2 + p_number, column=12)
+            p_number += 1
 
     def boot_menu(self):
         window = Tk()
         window.title("Ludo Board Game - Add Player")
+        window.geometry("260x270")
         types = ["Real", "Virtual"]
         types_dict = {"Real":True, "Virtual":False}
 
@@ -686,9 +722,9 @@ class Ludo:
         choose_type = OptionMenu(window, type, *types)
         choose_type.grid(row=3, column=1)
 
-        choose_button = Button(window, text="Add Player", command=lambda:self.add_player(color.get().lower(), types_dict[type.get()], nickname_entry.get(), window))
+        choose_button = Button(window, text="Add Player", command=lambda:self.add_player(color.get().lower(), types_dict[type.get()], nickname_entry.get(), window), padx=20)
         choose_button.grid(row=4, column=0)
-        start_button = Button(window, text="Start Game", command=lambda:self.close_window(window))
+        start_button = Button(window, text="Start Game", command=lambda:self.close_window(window), padx=20)
         start_button.grid(row=4, column=1)
 
         window.mainloop()
@@ -703,13 +739,14 @@ class Ludo:
             board.after(5000, self.select_counter(0))
             
         else:
-            self.hide_select_button = DISABLED
+            #self.hide_select_button = DISABLED
+            self.hide_select_button = NORMAL
             self.hide_roll_button = NORMAL
             self.side_panel()
 
     def board_init(self):
         self.boot_menu()
-        if len(self.real_player) + len(self.virtual_player) > 0:
+        if self.start_game == True:
             global board
             board = Tk()
             board.title("Ludo Board Game")
@@ -797,7 +834,7 @@ class Ludo:
             self.update_counters_pos()
             self.control_game()
 
-            button_quit = Button(board, text = "End", command = board.quit).grid(column=0, row = 11)                
+            button_quit = Button(board, text = "End", command = board.quit, padx=30).grid(column=0, row = 11)                
 
             board.mainloop()
 
