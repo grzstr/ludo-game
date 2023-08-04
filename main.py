@@ -21,6 +21,8 @@ class Player:
         self.counters = []
         self.chosen_counter = 1
         self.color = color
+        self.finished_the_game = False
+        self.podium = 0
         self.in_dock = 4
         self.dock_pos = dock_pos
         self.points = 100
@@ -29,12 +31,6 @@ class Player:
 
         for i in range(1, 5):
             self.counters.append(Counter(color, i, self.dock_pos))
-
-    def add_points(self, point):
-        self.points += point
-
-    def get_points(self):
-        return self.points
 
 class Virtual_Player(Player):
     def virtual_move(self):
@@ -63,6 +59,11 @@ class Ludo:
                           "blue":((9,2),(10,2),(9,3),(10,3)), 
                           "green":((9,9),(10,9),(9,10),(10,10)), 
                           "yellow":((2,9),(3,9),(2,10),(3,10)) }
+
+        self.end_pos = {"red":(5, 6), 
+                         "blue":(6, 5), 
+                         "green":(7, 6), 
+                         "yellow":(6, 7) }
 
     def update_dice_img(self):
         if self.chosen_type == "real":
@@ -129,7 +130,15 @@ class Ludo:
                     self.chosen_color = self.virtual_player[0].color
                     self.chosen_index = 0
                     self.chosen_type = "virtual"
-        
+            
+            #Player ended the game
+            if self.chosen_type == "real":
+                if self.real_player[self.chosen_index].podium != 0:
+                    self.next_color()
+            else:
+                if self.virtual_player[self.chosen_index].podium != 0:
+                    self.next_color()
+
     def add_player(self, color, is_real, nickname, window):
         if len(self.real_player)+len(self.virtual_player) < 4:
             if color in self.colors:
@@ -164,8 +173,8 @@ class Ludo:
         self.dice_unknown = False
         self.update_dice_img()
         self.hide_select_button = NORMAL
-        self.hide_roll_button = DISABLED
-        #self.hide_roll_button = NORMAL
+        #self.hide_roll_button = DISABLED
+        self.hide_roll_button = NORMAL
         self.side_panel()
 
     def kill(self):
@@ -190,6 +199,33 @@ class Ludo:
                             player.points -= 15
                             self.virtual_player[self.chosen_index].points += 20
         self.update_counters_pos()
+
+    def winner(self):
+        continue_game = False
+        if self.chosen_type == "real":
+            is_win = True
+            for counter in self.real_player[self.chosen_index].counters:
+                if counter.position[0] != self.end_pos[self.chosen_color][0] and counter.position[1] != self.end_pos[self.chosen_color][1]:
+                    is_win = False
+            
+            if is_win == True:
+                podium = 1
+            else:
+                podium = 0
+
+            for player in self.real_player:
+                if player.podium != 0:
+                    podium += 1
+                else:
+                    continue_game = True
+            for player in self.virtual_player:
+                if player.podium != 0:
+                    podium += 1
+                else:
+                    continue_game = True
+            self.real_player[self.chosen_index].finished_the_game = is_win
+            self.real_player[self.chosen_index].podium = podium
+        return continue_game
 
     def select_counter(self, select):
         if self.chosen_type == "real":
@@ -383,6 +419,9 @@ class Ludo:
                 # ======== MOVE LEFT ======== 
                 if roll == 0:
                     break    
+                elif roll < 0:
+                    Error_Label = Label(text=f"ERROR! - Roll is smaller than 0!").grid(column=1, row = 12, columnspan=11)
+
                 elif (position[0] > 7 and position[1] == 7):
                     if position[0] - roll < 7:
                         roll -= position[0] - 7
@@ -393,7 +432,7 @@ class Ludo:
                         break
                 elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
                     if position[0] - roll < 0:
-                        roll -= position[0] + 1
+                        roll -= position[0] - 1
                         position[0] = 1
                         
                     else:
@@ -406,9 +445,12 @@ class Ludo:
                                 break
                         elif position[0] == 7 and roll > 5:
                                 break
+                        elif position[0] == 6 and roll < 5:
+                            position[1] -= roll
+                            break
                         else:
                             roll -= position[0] - 6
-                            position[0] == 6
+                            position[0] = 6
                             
                     #OTHER SITUATIONS
                     elif position[0] - roll < 5:
@@ -494,7 +536,7 @@ class Ludo:
                         break                    
                 elif (position[0] == 5 and position[1] <= 5):
                     if position[1] - roll <= 0:
-                        roll -= 5 - position[1]
+                        roll -= position[1] - 1
                         position[1] = 1
                     else:
                         position[1] -= roll
@@ -554,8 +596,8 @@ class Ludo:
                         elif position[1] == 5 and roll > 5:
                                 break
                         else:
-                            roll -= position[0] - 6
-                            position[1] == 6
+                            roll -= 6 - position[1]
+                            position[1] = 6
                     #OTHER SITUATIONS
                     elif position[1] + roll > 7:
                         roll -= 7 - position[1]
@@ -583,7 +625,7 @@ class Ludo:
                 
 
             if position[0] > 11 or position[0] < 1 or position[1] > 11 or position[1] < 1: #Error Counter out of the board
-                Error_Label = Label(text=f"ERROR! - {color} counter {self.real_player[self.chosen_index].chosen_counter}! [{position[0], position[1]}]. Function try to move counter out of the board").grid(column=12, row = 7, columnspan=11)                
+                Error_Label = Label(text=f"ERROR! - {color} counter {self.real_player[self.chosen_index].chosen_counter}! [{position[0], position[1]}]. Function try to move counter out of the board").grid(column=12, row = 10, columnspan=11)                
             print(f"MOVE => POSITION UPDATE: X = {position[0]} | Y = {position[1]}")
             self.update_counters_pos()
 
@@ -594,18 +636,6 @@ class Ludo:
             self.start_game = True
             window.destroy()
             window.quit()
-
-    '''
-    def blink_counter(self, select):
-        if self.chosen_color == "red":
-            red_counter[select - 1] = Label(image=img_red_counter_blink)
-        if self.chosen_color == "yellow":
-            yellow_counter[select - 1] = Label(image=img_yellow_counter_blink)
-        if self.chosen_color == "green":
-            green_counter[select - 1] = Label(image=img_green_counter_blink)
-        if self.chosen_color == "blue":
-            blue_counter[select - 1] = Label(image=img_blue_counter_blink)
-    '''
 
     def side_panel(self):
         counter_number = [("1", 1),
@@ -639,12 +669,12 @@ class Ludo:
         p_number = 0
         for player in self.real_player:
             p_number += 1
-            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p"
+            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p" + f"- {player.podium}"
             if p_number !=4:
                 scoreboard += "\n"
         for player in self.virtual_player:
             p_number += 1
-            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p"
+            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p" + f"{player.podium}"
             if p_number !=4:
                 scoreboard += "\n"
         score_label = Label(text=scoreboard).grid(row=2, column=12, sticky=SW)
@@ -697,20 +727,57 @@ class Ludo:
 
         window.mainloop()
 
+    def end_window(self):
+        end = Tk()
+        end.title("Ludo Board Game - Winners!")
+        podium_label = Label(image=ImageTk.PhotoImage(Image.open("podium/podium.png"))).grid(row=0, column = 1, columnspan = 3, rowspan = 2)
+        for player in self.real_player:
+            if player.podium == 1:
+                first_player = player
+            if player.podium == 2:
+                second_player = player
+            if player.podium == 3:
+                third_player = player
+            if player.podium == 4:
+                fourth_player = player
+        for player in self.virtual_player:
+            if player.podium == 1:
+                first_player = player
+            if player.podium == 2:
+                second_player = player
+            if player.podium == 3:
+                third_player = player
+            if player.podium == 4:
+                fourth_player = player
+        if first_player != null:
+            first_label = Label(text=f"{first_player.nickname}\n{first_player.points} points").grid(row = 0, column = 2)
+        if second_player != null:
+            second_label = Label(text=f"{second_player.nickname}\n{second_player.points} points").grid(row = 0, column = 1)
+        if third_player != null:
+            third_label = Label(text=f"{third_player.nickname}\n{third_player.points} points").grid(row = 0, column = 3)
+        if fourth_player != null:
+            fourth_label = Label(text=f"{fourth_player.nickname}\n{fourth_player.points} points").grid(row = 3 , column = 1)
+        board.destroy()
+        board.quit()
+
     def control_game(self):
-        if self.chosen_type == "virtual":
-            self.hide_roll_button = DISABLED
-            self.hide_select_button = DISABLED
-            self.side_panel()
-            self.dice()
-            board.after(5000, func = self.side_panel())
-            board.after(5000, self.select_counter(0))
-            
+        continue_game = self.winner()
+        if continue_game == True:
+            if self.chosen_type == "virtual":
+                self.hide_roll_button = DISABLED
+                self.hide_select_button = DISABLED
+                self.side_panel()
+                self.dice()
+                board.after(5000, func = self.side_panel())
+                board.after(5000, self.select_counter(0))
+                
+            else:
+                #self.hide_select_button = DISABLED
+                self.hide_select_button = NORMAL
+                self.hide_roll_button = NORMAL
+                self.side_panel()
         else:
-            self.hide_select_button = DISABLED
-            #self.hide_select_button = NORMAL
-            self.hide_roll_button = NORMAL
-            self.side_panel()
+            self.end_window
 
     def board_init(self):
         self.boot_menu()
