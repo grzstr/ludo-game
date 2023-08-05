@@ -41,6 +41,7 @@ class Ludo:
         self.virtual_player = []
         self.colors = ["red", "yellow", "blue", "green"]
         self.used_colors = []
+        self.winners = []
         self.real_player = []
         self.chosen_color = ""
         self.hide_roll_button = NORMAL
@@ -133,10 +134,10 @@ class Ludo:
             
             #Player ended the game
             if self.chosen_type == "real":
-                if self.real_player[self.chosen_index].podium != 0:
+                if self.real_player[self.chosen_index].podium != 0 and self.real_player[self.chosen_index].podium != len(self.used_colors):
                     self.next_color()
             else:
-                if self.virtual_player[self.chosen_index].podium != 0:
+                if self.virtual_player[self.chosen_index].podium != 0 and self.virtual_player[self.chosen_index].podium != len(self.used_colors):
                     self.next_color()
 
     def add_player(self, color, is_real, nickname, window):
@@ -173,8 +174,8 @@ class Ludo:
         self.dice_unknown = False
         self.update_dice_img()
         self.hide_select_button = NORMAL
-        #self.hide_roll_button = DISABLED
-        self.hide_roll_button = NORMAL
+        self.hide_roll_button = DISABLED
+        #self.hide_roll_button = NORMAL
         self.side_panel()
 
     def kill(self):
@@ -201,30 +202,34 @@ class Ludo:
         self.update_counters_pos()
 
     def winner(self):
-        continue_game = False
         if self.chosen_type == "real":
-            is_win = True
+            total = 0
             for counter in self.real_player[self.chosen_index].counters:
-                if counter.position[0] != self.end_pos[self.chosen_color][0] and counter.position[1] != self.end_pos[self.chosen_color][1]:
-                    is_win = False
-            
-            if is_win == True:
-                podium = 1
-            else:
-                podium = 0
+                if counter.position[0] == self.end_pos[self.chosen_color][0] and counter.position[1] == self.end_pos[self.chosen_color][1]:
+                    total += 1
+            if total == 4:
+                self.winners.append(self.real_player[self.chosen_index].color)
+                podium = len(self.winners)     
+                self.real_player[self.chosen_index].finished_the_game = True
+                self.real_player[self.chosen_index].podium = len(self.winners)
 
-            for player in self.real_player:
-                if player.podium != 0:
-                    podium += 1
-                else:
-                    continue_game = True
-            for player in self.virtual_player:
-                if player.podium != 0:
-                    podium += 1
-                else:
-                    continue_game = True
-            self.real_player[self.chosen_index].finished_the_game = is_win
-            self.real_player[self.chosen_index].podium = podium
+        if self.chosen_type == "virtual":
+            total = 0
+            for counter in self.virtual_player[self.chosen_index].counters:
+                if counter.position[0] == self.end_pos[self.chosen_color][0] and counter.position[1] == self.end_pos[self.chosen_color][1]:
+                    total += 1
+            if total == 4:
+                self.winners.append(self.virtual_player[self.chosen_index].color)
+                podium = len(self.winners)     
+                self.virtual_player[self.chosen_index].finished_the_game = True
+                self.virtual_player[self.chosen_index].podium = len(self.winners)
+
+
+        if len(self.winners) == len(self.used_colors):
+            continue_game = False
+        else:
+            continue_game = True
+
         return continue_game
 
     def select_counter(self, select):
@@ -772,11 +777,13 @@ class Ludo:
                 board.after(5000, self.select_counter(0))
                 
             else:
-                #self.hide_select_button = DISABLED
-                self.hide_select_button = NORMAL
+                self.hide_select_button = DISABLED
+                #self.hide_select_button = NORMAL
                 self.hide_roll_button = NORMAL
                 self.side_panel()
         else:
+            self.hide_roll_button = DISABLED
+            self.hide_select_button = DISABLED
             self.end_window
 
     def board_init(self):
