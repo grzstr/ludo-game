@@ -1,6 +1,7 @@
 from tkinter import *
 import random
 from PIL import ImageTk, Image
+import sqlite3
 
 
 class Counter:
@@ -44,12 +45,16 @@ class Ludo:
         self.winners = []
         self.real_player = []
         self.chosen_color = ""
+        self.select = 1
+        self.continue_game = True
         self.hide_roll_button = NORMAL
         self.hide_select_button = DISABLED
         self.dice_unknown = True
         self.start_game = False
         self.chosen_type = ""
         self.chosen_index = 0
+        self.chosen_language = 0
+        self.show_counters_pos = False
         
         self.start_pos = {"red":(1, 5), 
                           "blue":(7, 1), 
@@ -65,6 +70,70 @@ class Ludo:
                          "blue":(6, 5), 
                          "green":(7, 6), 
                          "yellow":(6, 7) }
+
+        self.languages = {"languages": ("English", "polski"),
+                            "lan_yes": ("Yes", "Tak"),
+                            "lan_no": ("No", "Nie"), 
+                            "colors": (("red", "blue", "green", "yellow"),("czerwony", "niebieski", "zielony", "żółty"))}
+
+    def add_player_to_save(self, c, player, type):
+        c.execute("""INSERT INTO players VALUES (
+            :nickname, 
+            :color, 
+            :type, 
+            :points, 
+            :podium, 
+            :counter_1_pos_x, 
+            :counter_1_pos_y, 
+            :counter_2_pos_x,
+            :counter_2_pos_y,
+            :counter_3_pos_x,
+            :counter_3_pos_y,
+            :counter_4_pos_x,
+            :counter_4_pos_y)""", 
+                {
+                    "nickname": player.nickname, 
+                    "color": player.color, 
+                    "type": type, 
+                    "points": player.points, 
+                    "podium": player.podium, 
+                    "counter_1_pos_x integer": player.counters[0].position[0], 
+                    "counter_1_pos_y integer": player.counters[0].position[1], 
+                    "counter_2_pos_x integer": player.counters[1].position[0],
+                    "counter_2_pos_y integer": player.counters[1].position[1],
+                    "counter_3_pos_x integer": player.counters[2].position[0],
+                    "counter_3_pos_y integer": player.counters[2].position[1],
+                    "counter_4_pos_x integer": player.counters[3].position[0],
+                    "counter_4_pos_y integer": player.counters[3].position[1]
+                }
+                )       
+        c.commit()
+
+    def save_game(self):
+        save = sqlite3.connect('saved_game.db')
+        c = save.cursor()
+        c.execute("""CREATE TABLE if not exists players (
+                nickname text,
+                color text,
+                type text,
+                points integer,
+                podium integer,
+                counter_1_pos_x integer,
+                counter_1_pos_y integer,
+                counter_2_pos_x integer,
+                counter_2_pos_y integer,
+                counter_3_pos_x integer,
+                counter_3_pos_y integer,
+                counter_4_pos_x integer,
+                counter_4_pos_y integer
+                )""")    
+        
+        for player in self.real_player:
+            self.add_player_to_save(c, player, "real")
+        for player in self.virtual_player:
+            self.add_player_to_save(c, player, "real")
+
+        c.close()
 
     def update_dice_img(self):
         if self.chosen_type == "real":
@@ -174,8 +243,8 @@ class Ludo:
         self.dice_unknown = False
         self.update_dice_img()
         self.hide_select_button = NORMAL
-        self.hide_roll_button = DISABLED
-        #self.hide_roll_button = NORMAL
+        #self.hide_roll_button = DISABLED
+        self.hide_roll_button = NORMAL
         self.side_panel()
 
     def kill(self):
@@ -202,37 +271,55 @@ class Ludo:
         self.update_counters_pos()
 
     def winner(self):
-        if self.chosen_type == "real":
-            total = 0
-            for counter in self.real_player[self.chosen_index].counters:
-                if counter.position[0] == self.end_pos[self.chosen_color][0] and counter.position[1] == self.end_pos[self.chosen_color][1]:
-                    total += 1
-            if total == 4:
-                self.winners.append(self.real_player[self.chosen_index].color)
-                podium = len(self.winners)     
-                self.real_player[self.chosen_index].finished_the_game = True
-                self.real_player[self.chosen_index].podium = len(self.winners)
+        if self.real_player[self.chosen_index].color in self.winners:
+            print("ERROR - Color is in winners!")
+        else:
+            if self.chosen_type == "real":
+                total = 0
+                for counter in self.real_player[self.chosen_index].counters:
+                    if counter.position[0] == self.end_pos[self.chosen_color][0] and counter.position[1] == self.end_pos[self.chosen_color][1]:
+                        total += 1
+                if total == 4:
+                    self.winners.append(self.real_player[self.chosen_index].color)
+                    podium = len(self.winners)     
+                    self.real_player[self.chosen_index].finished_the_game = True
+                    self.real_player[self.chosen_index].podium = len(self.winners)
+                    if len(self.winners) == 1:
+                        self.real_player[self.chosen_index].points += 100
+                    if len(self.winners) == 2:
+                        self.real_player[self.chosen_index].points += 80
+                    if len(self.winners) == 3:
+                        self.real_player[self.chosen_index].points += 60
+                    if len(self.winners) == 4:
+                        self.real_player[self.chosen_index].points += 50
 
-        if self.chosen_type == "virtual":
-            total = 0
-            for counter in self.virtual_player[self.chosen_index].counters:
-                if counter.position[0] == self.end_pos[self.chosen_color][0] and counter.position[1] == self.end_pos[self.chosen_color][1]:
-                    total += 1
-            if total == 4:
-                self.winners.append(self.virtual_player[self.chosen_index].color)
-                podium = len(self.winners)     
-                self.virtual_player[self.chosen_index].finished_the_game = True
-                self.virtual_player[self.chosen_index].podium = len(self.winners)
 
+            if self.chosen_type == "virtual":
+                total = 0
+                for counter in self.virtual_player[self.chosen_index].counters:
+                    if counter.position[0] == self.end_pos[self.chosen_color][0] and counter.position[1] == self.end_pos[self.chosen_color][1]:
+                        total += 1
+                if total == 4:
+                    self.winners.append(self.virtual_player[self.chosen_index].color)
+                    podium = len(self.winners)     
+                    self.virtual_player[self.chosen_index].finished_the_game = True
+                    self.virtual_player[self.chosen_index].podium = len(self.winners)
+                    if len(self.winners) == 1:
+                        self.virtual_player[self.chosen_index].points += 100
+                    if len(self.winners) == 2:
+                        self.virtual_player[self.chosen_index].points += 80
+                    if len(self.winners) == 3:
+                        self.virtual_player[self.chosen_index].points += 60
+                    if len(self.winners) == 4:
+                        self.virtual_player[self.chosen_index].points += 50
 
         if len(self.winners) == len(self.used_colors):
-            continue_game = False
+            self.continue_game = False
         else:
-            continue_game = True
-
-        return continue_game
+            self.continue_game = True
 
     def select_counter(self, select):
+        self.select = select + 1
         if self.chosen_type == "real":
             self.real_player[self.chosen_index].chosen_counter = select
             print(f"SELECTED COUNTER = {select} || TYPE = {self.chosen_type} || ROLL = {self.real_player[self.chosen_index].roll} || POSITION X = {self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position[0]} Y = {self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position[1]}  || COLOR = {self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].color}")
@@ -248,6 +335,7 @@ class Ludo:
         
 
         self.kill()
+        self.winner()
         if self.chosen_type == "real":
             if self.real_player[self.chosen_index].roll != 6:
                 self.next_color()
@@ -634,14 +722,6 @@ class Ludo:
             print(f"MOVE => POSITION UPDATE: X = {position[0]} | Y = {position[1]}")
             self.update_counters_pos()
 
-    def close_window(self, window):
-        if (len(self.real_player) + len(self.virtual_player)) == 0:
-            M1 = Label(window, text="There are no players!").grid(row=5, column = 0, columnspan=2)
-        else:
-            self.start_game = True
-            window.destroy()
-            window.quit()
-
     def side_panel(self):
         counter_number = [("1", 1),
                           ("2", 2),
@@ -655,18 +735,18 @@ class Ludo:
         chosen_color_label = Label(text=f"Chosen color:\n{self.chosen_color}", bg = self.chosen_color).grid(column=0, row =1)
 
         selected_counter = IntVar()
-        selected_counter.set(1)
+        selected_counter.set(self.select)
         
         i = 0 
         for text, mode in counter_number:
             Radiobutton(board, text=text, variable= selected_counter, value=mode).grid(column=0, row=5 + i)
             i += 1
 
-        #choose_counter_button = Button(board, text="Select Counter", command=lambda:self.blink_counter(selected_counter.get()))
-        #choose_counter_button.grid(column=0, row=9)
+        save_button = Button(board, text="Save&Quit", command= self.save_game)
+        save_button.grid(column=0, row=10)
 
         choose_counter_button = Button(board, text="Move Counter", state=self.hide_select_button,command=lambda:self.select_counter(selected_counter.get()-1))
-        choose_counter_button.grid(column=0, row=10)
+        choose_counter_button.grid(column=0, row=9)
 
         #Scoreboard
         score_title_label = Label(text="Scoreboard:").grid(row=1, column=12, sticky=S)
@@ -686,18 +766,21 @@ class Ludo:
 
         #Counters position
         
-        counters_title_label = Label(text="Counters positions:").grid(row=3, column=12, sticky=S)
-        p_number = 0
-        for player in self.real_player:
-            pos_text= ""
-            for i in range(4):
-                pos_text += f"[{player.color}][{player.counters[i].number}] -> [{player.counters[i].position[0]}, {player.counters[i].position[1]}]"
-                if i !=3:
-                    pos_text += "\n"
-            pos_label = Label(text=pos_text, anchor=SW).grid(row=4 + p_number, column=12, sticky=SW)
-            p_number += 1
+        if self.show_counters_pos == True:
+            counters_title_label = Label(text="Counters positions:").grid(row=3, column=12, sticky=S)
+            p_number = 0
+            for player in self.real_player:
+                pos_text= ""
+                for i in range(4):
+                    pos_text += f"[{player.color}][{player.counters[i].number}] -> [{player.counters[i].position[0]}, {player.counters[i].position[1]}]"
+                    if i !=3:
+                        pos_text += "\n"
+                pos_label = Label(text=pos_text, anchor=SW).grid(row=4 + p_number, column=12, sticky=SW)
+                p_number += 1
 
-    def boot_menu(self):
+    def new_game_menu(self, prev_window):
+        prev_window.destroy()
+        prev_window.quit()
         window = Tk()
         window.title("Ludo Board Game - Add Player")
         window.geometry("392x410")
@@ -707,67 +790,58 @@ class Ludo:
         img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
         logo_label = Label(window, image=img_logo).grid(row=0, column = 0, columnspan =2)
 
-
-        nickname_label = Label(window, text="Nickname: ").grid(row=1, column = 0, sticky=E)
+        nickname_label = Label(window, text="Nickname: ").grid(row=1, column = 0, sticky=E, padx = 5)
         nickname_entry = Entry(window, width=10)
-        nickname_entry.grid(row=1, column=1, sticky=W)
+        nickname_entry.grid(row=1, column=1, sticky=W, padx = 5)
         nickname_entry.insert(0, "Player")
 
         color = StringVar()
         color.set(self.colors[0])
-        color_label = Label(window, text = "Color: ").grid(row=2, column=0, sticky=E)
+        color_label = Label(window, text = "Color: ").grid(row=2, column=0, sticky=E, padx = 5)
         choose_color = OptionMenu(window, color, *self.colors)
-        choose_color.grid(row=2, column=1, sticky=W)
+        choose_color.grid(row=2, column=1, sticky=W, padx = 5)
 
         type = StringVar()
         type.set(types[0])
-        type_label = Label(window, text = "Type: ").grid(row=3, column=0, sticky=E)
+        type_label = Label(window, text = "Type: ").grid(row=3, column=0, sticky=E, padx = 5)
         choose_type = OptionMenu(window, type, *types)
-        choose_type.grid(row=3, column=1, sticky=W)
+        choose_type.grid(row=3, column=1, sticky=W, padx = 5)
 
         choose_button = Button(window, text="Add Player", command=lambda:self.add_player(color.get().lower(), types_dict[type.get()], nickname_entry.get(), window), padx=20)
-        choose_button.grid(row=4, column=0, sticky=E)
-        start_button = Button(window, text="Start Game", command=lambda:self.close_window(window), padx=20)
-        start_button.grid(row=4, column=1, sticky=W)
+        choose_button.grid(row=4, column=0, sticky=E, padx = 5)
+        start_button = Button(window, text="Start Game", command=lambda:self.board_init(window), padx=20)
+        start_button.grid(row=4, column=1, sticky=W, padx = 5)
 
         window.mainloop()
 
     def end_window(self):
-        end = Tk()
+        end = Toplevel(board)
         end.title("Ludo Board Game - Winners!")
-        podium_label = Label(image=ImageTk.PhotoImage(Image.open("podium/podium.png"))).grid(row=0, column = 1, columnspan = 3, rowspan = 2)
+        global podium_img
+        podium_img = ImageTk.PhotoImage(Image.open("podium.png"))
+        podium_label = Label(master=end, image=podium_img).grid(row=0, column = 1, columnspan = 3, rowspan = 2)
         for player in self.real_player:
             if player.podium == 1:
-                first_player = player
+                first_label = Label(master=end, text=f"1.{player.nickname}\n{player.points} points").grid(row = 0, column = 2)
             if player.podium == 2:
-                second_player = player
+                second_label = Label(master=end, text=f"2.{player.nickname}\n{player.points} points").grid(row = 0, column = 1)
             if player.podium == 3:
-                third_player = player
+                third_label = Label(master=end, text=f"3.{player.nickname}\n{player.points} points").grid(row = 0, column = 3)
             if player.podium == 4:
-                fourth_player = player
+                fourth_label = Label(master=end, text=f"4.{player.nickname}\n{player.points} points").grid(row = 3 , column = 2)
         for player in self.virtual_player:
             if player.podium == 1:
-                first_player = player
+                first_label = Label(master=end, text=f"1.{player.nickname}\n{player.points} points").grid(row = 0, column = 2)
             if player.podium == 2:
-                second_player = player
+                second_label = Label(master=end, text=f"2.{player.nickname}\n{player.points} points").grid(row = 0, column = 1)
             if player.podium == 3:
-                third_player = player
+                third_label = Label(master=end, text=f"3.{player.nickname}\n{player.points} points").grid(row = 0, column = 3)
             if player.podium == 4:
-                fourth_player = player
-        if first_player != null:
-            first_label = Label(text=f"{first_player.nickname}\n{first_player.points} points").grid(row = 0, column = 2)
-        if second_player != null:
-            second_label = Label(text=f"{second_player.nickname}\n{second_player.points} points").grid(row = 0, column = 1)
-        if third_player != null:
-            third_label = Label(text=f"{third_player.nickname}\n{third_player.points} points").grid(row = 0, column = 3)
-        if fourth_player != null:
-            fourth_label = Label(text=f"{fourth_player.nickname}\n{fourth_player.points} points").grid(row = 3 , column = 1)
-        board.destroy()
-        board.quit()
+                fourth_label = Label(master=end, text=f"4.{player.nickname}\n{player.points} points").grid(row = 3 , column = 2)
+        end.mainloop()
 
     def control_game(self):
-        continue_game = self.winner()
-        if continue_game == True:
+        if self.continue_game == True:
             if self.chosen_type == "virtual":
                 self.hide_roll_button = DISABLED
                 self.hide_select_button = DISABLED
@@ -775,20 +849,25 @@ class Ludo:
                 self.dice()
                 board.after(5000, func = self.side_panel())
                 board.after(5000, self.select_counter(0))
-                
+                self.winner()
             else:
-                self.hide_select_button = DISABLED
-                #self.hide_select_button = NORMAL
+                #self.hide_select_button = DISABLED
+                self.hide_select_button = NORMAL
                 self.hide_roll_button = NORMAL
                 self.side_panel()
         else:
             self.hide_roll_button = DISABLED
             self.hide_select_button = DISABLED
-            self.end_window
+            self.side_panel()
+            self.end_window()
 
-    def board_init(self):
-        self.boot_menu()
-        if self.start_game == True:
+    def board_init(self, prev_window):
+        if (len(self.real_player) + len(self.virtual_player)) == 0:
+            M1 = Label(prev_window, text="There are no players!").grid(row=5, column = 0, columnspan=2)
+        else:
+            self.start_game = True
+            prev_window.destroy()
+            prev_window.quit()
             global board
             board = Tk()
             board.title("Ludo Board Game")
@@ -916,9 +995,77 @@ class Ludo:
             self.update_counters_pos()
             self.control_game()
 
-            button_quit = Button(board, text = "End", command = board.quit, padx=30).grid(column=0, row = 11)                
+            button_quit = Button(board, text = "End", command = board.quit, padx=30).grid(column=0, row = 11)           
 
             board.mainloop()
 
+    def set_options(self, prev_window, language, show_pos):
+        prev_window.destroy()
+
+        if show_pos == self.languages["lan_yes"][self.chosen_language]:
+            self.show_counters_pos = True
+        if show_pos == self.languages["lan_no"][self.chosen_language]:
+            self.show_counters_pos = False
+        if language == self.languages["languages"][0]:
+            self.chosen_language = 0
+        if language == self.languages["languages"][1]:
+            self.chosen_language = 1
+        
+        self.main_menu()
+
+    def back_to_menu(self, prev_window):
+        prev_window.destroy()
+        self.main_menu()
+
+    def options_menu(self, prev_window):
+        prev_window.destroy()
+        start = Tk()
+        start.title("Ludo Board Game")
+        global img_logo
+        img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
+        logo_label = Label(start, image=img_logo).grid(row=0, column = 0, columnspan=2)
+
+        #Choose Language
+        language_label = Label(start, text = "Language:").grid(row=1, column = 0, sticky = E, padx = 5)
+        select_language = StringVar()
+        select_language.set(self.languages["languages"][self.chosen_language])
+        choose_language = OptionMenu(start, select_language, *self.languages["languages"])
+        choose_language.grid(row=1, column=1, sticky=W, padx = 5)
+
+        #Show Counters position
+        counters_pos_label = Label(start, text = "Show counters positions:").grid(row=2, column = 0, sticky = E, padx = 5)
+        select_counters_pos = StringVar()
+        if self.show_counters_pos == True:
+            select_counters_pos.set(self.languages["lan_yes"][self.chosen_language])
+        if self.show_counters_pos == False:
+            select_counters_pos.set(self.languages["lan_no"][self.chosen_language])
+        show_counters = OptionMenu(start, select_counters_pos, *(self.languages["lan_yes"][self.chosen_language], self.languages["lan_no"][self.chosen_language]))
+        show_counters.grid(row=2, column=1, sticky=W, padx = 5)
+
+        save_button = Button(start, text="Save changes", command=lambda:self.set_options(start, select_language.get(), select_counters_pos.get())).grid(row = 5, column=0)
+        discard_button = Button(start, text="Discard changes", command=lambda:self.back_to_menu(start)).grid(row=5, column=1)
+
+    def leadership(self, start):
+        start.destroy()
+
+    def load_game(self, start):
+        return
+
+    def main_menu(self):
+        start = Tk()
+        start.title("Ludo Board Game")
+        load_game_status = DISABLED
+
+        img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
+        logo_label = Label(start, image=img_logo).grid(row=0, column = 0)
+        new_game_button = Button(start, text="New Game", command = lambda:self.new_game_menu(start), padx = 20).grid(row=1, column=0, pady=5)
+        load_game_button = Button(start, text="Load Game", command = lambda:self.load_game(start), state=load_game_status, padx=18).grid(row=2, column=0, pady=5)
+        leadership_button = Button(start, text="Leadership Board", command = lambda:self.leadership(start), padx = 2).grid(row=3, column=0, pady=5)
+        options_button = Button(start, text="Options", command = lambda:self.options_menu(start), padx = 27).grid(row=4, column=0, pady=5)
+        end_button = Button(start, text="End", command = start.quit, padx = 38).grid(row=5, column = 0, pady=5)
+
+        start.mainloop()
+
+
 game = Ludo() 
-game.board_init()
+game.main_menu()
