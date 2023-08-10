@@ -71,18 +71,120 @@ class Ludo:
                          "green":(7, 6), 
                          "yellow":(6, 7) }
 
-        self.languages = {"languages": ("English", "polski"),
+        #LANGUAGES DICTIONARIES
+
+        self.color_types_dict = {"Real": "real",
+                                "Virtual": "virtual",
+                                "Red": "red",
+                                "Blue": "blue",
+                                "Green": "green",
+                                "Yellow": "yellow",
+                                
+                                #POLISH
+                                "Rzeczywisty": "real",
+                                "Wirtualny": "virtual",
+                                "Czerwony": "red",
+                                "Niebieski": "blue",
+                                "Zielony": "green",
+                                "Żółty": "yellow",}
+
+        self.languages = {  "title": ("Ludo Board Game", 'Gra planszowa "Chińczyk"'),
+                            "languages": ("English", "polski"),
                             "lan_yes": ("Yes", "Tak"),
                             "lan_no": ("No", "Nie"), 
-                            "colors": (("red", "blue", "green", "yellow"),("czerwony", "niebieski", "zielony", "żółty"))}
 
-    def add_player_to_save(self, c, player, type):
+                            #COLORS TYPES
+                            "colors": (("Red", "Blue", "Green", "Yellow"),("Czerwony", "Niebieski", "Zielony", "Żółty")),
+                            "types": (("Real", "Virtual"), ("Rzeczywisty", "Wirtualny")),
+
+                            "red": ("Red", "Czerwony"),
+                            "green": ("Green", "Zielony"),
+                            "blue": ("Blue", "Niebieski"),
+                            "yellow": ("Yellow", "Żółty"),
+
+                            #MAIN MENU
+                            "new_game": ("New game", "Nowa gra"),
+                            "load_game": ("Continue game", "Kontynuuj grę"),
+                            "victory": ("Victory board", "Tablica zwycięstw"),
+                            "options": ("Options", "Opcje"),
+                            "end": ("End", "Zakończ"),
+
+                            #NEW GAME MENU
+                            "color": ("Color", "Kolor"),
+                            "nickname": ("Nickname", "Nazwa"),
+                            "player": ("Player", "Gracz"),
+                            "type": ("Type", "Typ"),
+                            "add_player": ("Add Player", "Dodaj gracza"),
+                            "start_game": ("Start game", "Rozpocznij grę"),
+
+                            #BOARD INIT
+                            "roll": ("Roll", "Rzuć kostką"),
+                            "chosen_color": ("Chosen color", "Wybrany kolor"),
+                            "save_game": ("Save game", "Zapisz grę"),
+                            "move_counter": ("Move counter", "Rusz pionek"),
+                            "scoreboard": ("Scoreboard", "Tablica wyników"),
+                            "counter_position": ("Counters positions", "Pozycje pionków"),
+
+                            #OPTIONS MENU
+                            "language": ("Language", "Język"),
+                            "show_counters_pos": ("Show counters positions", "Pokaż pozycję pionków"),
+                            "save": ("Save changes", "Zapisz zmiany"),
+                            "discard": ("Discard changes", "Niezapisuj zmian"),
+
+                            "back": ("Back", "Powrót"),
+                            
+                            #ERROR MESSAGES
+                            "no_players": ("There are no players!", "Brak graczy!"),
+                            "no_leaders": ("There are no data to display!", "Brak danych do wyświetlenia!"),
+                            "wrong_color": ("Wrong color!", "Zły kolor!"),
+                            "used_color": ("This color has already been used!", "Ten kolor już został wykorzystany!"),
+                            "four_players": ("There are already four players!", "Jest już czterech graczy!"),
+                            "roll_smaller_0": ("ERROR! - Roll is smaller than 0!", "BŁĄD! - Wyrzucono liczbę mniejszą niż 0"),
+                            
+                            #CANNOT MOVE COUNTER NUMBER
+                            "cannot_move_0": ("ERROR! - Cannot move", "Błąd nie można ruszyć"),
+                            "cannot_move_1": ("counter number", "pionka numer")
+
+                            }
+
+    def add_leader(self, leaders, player, type):
+        c = leaders.cursor()
+        c.execute("""INSERT INTO players VALUES (
+            :nickname, 
+            :type,
+            :points
+             )""", 
+                {
+                    "nickname": player.nickname, 
+                    "type": type, 
+                    "points": player.points
+                }
+                )       
+        leaders.commit()
+
+    def save_leaders(self):
+        leaders = sqlite3.connect('leaders.db')
+        c = leaders.cursor()
+        c.execute("""CREATE TABLE if not exists players (
+                nickname text,
+                type text,
+                points integer
+                )""")    
+        
+        for player in self.real_player:
+            self.add_leader(leaders, player, "real")
+        for player in self.virtual_player:
+            self.add_leader(leaders, player, "virtual")
+        c.close()
+
+    def add_player_to_save(self, save, player, type):
+        c = save.cursor()
         c.execute("""INSERT INTO players VALUES (
             :nickname, 
             :color, 
             :type, 
             :points, 
-            :podium, 
+            :podium,
             :counter_1_pos_x, 
             :counter_1_pos_y, 
             :counter_2_pos_x,
@@ -97,21 +199,22 @@ class Ludo:
                     "type": type, 
                     "points": player.points, 
                     "podium": player.podium, 
-                    "counter_1_pos_x integer": player.counters[0].position[0], 
-                    "counter_1_pos_y integer": player.counters[0].position[1], 
-                    "counter_2_pos_x integer": player.counters[1].position[0],
-                    "counter_2_pos_y integer": player.counters[1].position[1],
-                    "counter_3_pos_x integer": player.counters[2].position[0],
-                    "counter_3_pos_y integer": player.counters[2].position[1],
-                    "counter_4_pos_x integer": player.counters[3].position[0],
-                    "counter_4_pos_y integer": player.counters[3].position[1]
+                    "counter_1_pos_x": player.counters[0].position[0], 
+                    "counter_1_pos_y": player.counters[0].position[1], 
+                    "counter_2_pos_x": player.counters[1].position[0],
+                    "counter_2_pos_y": player.counters[1].position[1],
+                    "counter_3_pos_x": player.counters[2].position[0],
+                    "counter_3_pos_y": player.counters[2].position[1],
+                    "counter_4_pos_x": player.counters[3].position[0],
+                    "counter_4_pos_y": player.counters[3].position[1]
                 }
                 )       
-        c.commit()
+        save.commit()
 
     def save_game(self):
         save = sqlite3.connect('saved_game.db')
         c = save.cursor()
+        c.execute("drop table if exists players")
         c.execute("""CREATE TABLE if not exists players (
                 nickname text,
                 color text,
@@ -129,11 +232,10 @@ class Ludo:
                 )""")    
         
         for player in self.real_player:
-            self.add_player_to_save(c, player, "real")
+            self.add_player_to_save(save, player, "real")
         for player in self.virtual_player:
-            self.add_player_to_save(c, player, "real")
-
-        c.close()
+            self.add_player_to_save(save, player, "virtual")
+        save.close()
 
     def update_dice_img(self):
         if self.chosen_type == "real":
@@ -213,8 +315,7 @@ class Ludo:
         if len(self.real_player)+len(self.virtual_player) < 4:
             if color in self.colors:
                 if color in self.used_colors:
-                    print("This color has already been used!")
-                    Error_label = Label(window, text="This color has already been used!").grid(row=5, column=0, columnspan=2)
+                    Error_label = Label(window, text=self.languages["used_color"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
                 else:
                     self.used_colors.append(color)
                     if is_real == True:
@@ -222,17 +323,17 @@ class Ludo:
                     else:
                         self.virtual_player.append(Virtual_Player(color, self.dock_pos, nickname))
             else:
-                Error_label = Label(window, text="Wrong color!").grid(row=5, column=0, columnspan=2)
+                Error_label = Label(window, text=self.languages["wrong_color"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
         else:
-            Error_label = Label(window, text="There are already four players!").grid(row=5, column=0, columnspan=2)
+            Error_label = Label(window, text=self.languages["four_players"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
 
         for x in range(len(self.real_player)):
-            players_number_label = Label(window, text=f"[{x + 1}]: {self.real_player[x].nickname}, Real, {self.real_player[x].color}")
-            players_number_label.grid(row=6+x, column=0, columnspan=2)
+            players_number_label = Label(window, text=f"[{len(self.real_player)+len(self.virtual_player)}]: {self.real_player[x].nickname}, {self.languages['types'][self.chosen_language][0]}, {self.languages[self.real_player[x].color][self.chosen_language]}")
+            players_number_label.grid(row=6+len(self.real_player)+len(self.virtual_player), column=0, columnspan=2)
 
         for y in range(len(self.virtual_player)):
-            virtual_number_label = Label(window, text=f"[{y+x}]: {self.virtual_player[y].nickname}, Virtual {self.virtual_player[y].color}")
-            virtual_number_label.grid(row=6+x+y, column=0, columnspan=2)
+            virtual_number_label = Label(window, text=f"[{len(self.real_player)+len(self.virtual_player)}]: {self.virtual_player[y].nickname}, {self.languages['types'][self.chosen_language][1]} {self.languages[self.virtual_player[y].color][self.chosen_language]}")
+            virtual_number_label.grid(row=6+len(self.real_player)+len(self.virtual_player), column=0, columnspan=2)
 
     def dice(self):
         roll = random.randint(1, 6)
@@ -322,17 +423,14 @@ class Ludo:
         self.select = select + 1
         if self.chosen_type == "real":
             self.real_player[self.chosen_index].chosen_counter = select
-            print(f"SELECTED COUNTER = {select} || TYPE = {self.chosen_type} || ROLL = {self.real_player[self.chosen_index].roll} || POSITION X = {self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position[0]} Y = {self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position[1]}  || COLOR = {self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].color}")
-            self.move(self.real_player[self.chosen_index].roll, 
-                      self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position, 
-                      self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].color)
+            self.check_dock(self.real_player[self.chosen_index].roll, 
+                            self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].position, 
+                            self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].color)
         else:
             self.virtual_player[self.chosen_index].virtual_move()
-            print(f"SELECTED COUNTER = {self.virtual_player[self.chosen_index].chosen_counter} || TYPE = {self.chosen_type} || ROLL = {self.virtual_player[self.chosen_index].roll} || POSITION X = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position[0]} Y = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position[0]} || COLOR = {self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color}")
-            self.move(self.virtual_player[self.chosen_index].roll, 
-                      self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position, 
-                      self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color)
-        
+            self.check_dock(self.virtual_player[self.chosen_index].roll, 
+                            self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].position, 
+                            self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].color)
 
         self.kill()
         self.winner()
@@ -347,141 +445,14 @@ class Ludo:
         self.control_game()
 
     def adjust_counter_position(self, counter, select, color):   
-        print(f"SELECT = {select}")   
-        pad_y = 0
-        pad_x = 0  
-        if counter.position[0] == 1:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_x)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 2:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 3:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 4:
-            #pad_y = 0
-            #pad_x = 6
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 5:
-            #pad_y = 0
-            #pad_x = 0
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 6:
-            #pad_y = 0
-            #pad_x = 0
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 7:
-            #pad_y = 0
-            #pad_x = 15
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)   
-        elif counter.position[0] == 8:
-            #pad_y = 0
-            #pad_x = 5
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 9:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 10:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 11:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-        elif counter.position[0] == 12:
-            #pad_y = 0
-            #pad_x = 10
-            if color == "red":
-                red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "blue":
-                blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "green":
-                green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
-            elif color == "yellow":
-                yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0], pady = pad_y, padx = pad_y)
+        if color == "red":
+            red_counter[select - 1].grid(row=counter.position[1], column=counter.position[0])
+        elif color == "blue":
+            blue_counter[select - 1].grid(row=counter.position[1], column=counter.position[0])
+        elif color == "green":
+            green_counter[select - 1].grid(row=counter.position[1], column=counter.position[0])
+        elif color == "yellow":
+            yellow_counter[select - 1].grid(row=counter.position[1], column=counter.position[0])
 
     def update_counters_pos(self):
         for x in self.real_player:
@@ -496,7 +467,172 @@ class Ludo:
                 self.adjust_counter_position(y, i, x.color)
 
     def move(self, roll, position, color):
-            stop = 0
+            if roll > 0:
+                # ======== MOVE LEFT ======== 
+                if (position[0] > 7 and position[1] == 7):
+                    if position[0] - roll < 7:
+                        roll -= position[0] - 7
+                        position[0] = 7
+                        self.move(roll, position, color)
+                    else:
+                        position[0] -= roll
+                elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
+                    if position[0] - roll < 0:
+                        roll -= position[0] - 1
+                        position[0] = 1
+                        self.move(roll, position, color)                
+                    else:
+                        position[0] -= roll
+                elif (position[0] > 5 and position[0] <= 7 and position[1] == 11):
+                    #YELLOW VICTOR ROAD ENTER
+                    if position[0] >= 6 and color == 'yellow':
+                        if position[0] == 6 and roll < 5:
+                            position[1] -= roll
+                        elif (position[0] != 6 and roll <= 4) or (position[0] != 7 and roll <= 5):
+                            roll -= position[0] - 6
+                            position[0] = 6
+                            self.move(roll, position, color)                        
+                    #OTHER SITUATIONS
+                    elif position[0] - roll < 5:
+                        roll -= position[0] - 5
+                        position[0] = 5
+                        self.move(roll, position, color)                    
+                    else:
+                        position[0] -= roll
+                #GREEN VICTORY ROAD
+                elif (position[0] == 11 and position[1] == 6 and color == 'green'):
+                    if roll <= 4:
+                        position[0] -= roll
+                        self.move(roll, position, color)
+                elif position[1] == 6 and color == "green" and  position[0] != 7:
+                    if position[0] - 7 >= roll:
+                        position[0] -= roll
+
+                # ======== MOVE RIGHT ======== 
+                elif (position[0] < 5 and position[1] == 5):
+                    if position[0] + roll > 5:
+                        roll -= 5 - position[0]
+                        position[0] = 5
+                        self.move(roll, position, color)
+                    else:
+                        position[0] += roll           
+                elif (position[0] >= 7 and position[0] < 11 and position[1] == 5):
+                    if position[0] + roll > 12:
+                        roll -= 11 - position[0]
+                        position[0] = 11
+                        self.move(roll, position, color)
+                    else:
+                        position[0] += roll        
+                elif (position[0] >= 5 and position[0] < 7 and position[1] == 1):
+                    #BLUE VICTOR ROAD ENTER
+                    if position[0] <= 6 and color == 'blue':
+                        if position[0] == 6 and roll <= 4:
+                            position[1] += roll 
+                        elif (position[0] != 6 and roll <= 4) or (position[0] != 5 and roll <= 5):
+                            roll -= 6 - position[0]
+                            position[0] = 6
+                            self.move(roll, position, color)
+                    #OTHER SITUATIONS
+                    elif position[0] + roll >= 7:
+                        roll -= 7 - position[0]
+                        position[0] = 7
+                        self.move(roll, position, color)
+                    else:
+                        position[0] += roll
+                #RED VICTORY ROAD
+                elif (position[0] == 1 and position[1] == 6 and color == 'red'):
+                    if roll <= 4:
+                        position[0] += roll
+                elif position[1] == 6 and position[0] < 5 and color =='red':
+                    if 5 - position[0] >= roll:
+                        position[0] += roll
+                
+                # ======== MOVE UP ======== 
+                elif (position[0] == 5 and position[1] >= 7):
+                    if position[1] - roll <= 7:
+                        roll -= position[1] - 7
+                        position[1] = 7
+                        self.move(roll, position, color)
+                    else:
+                        position[1] -= roll                  
+                elif (position[0] == 5 and position[1] <= 5):
+                    if position[1] - roll <= 0:
+                        roll -= position[1] - 1
+                        position[1] = 1
+                        self.move(roll, position, color)
+                    else:
+                        position[1] -= roll       
+                elif (position[1] >= 5 and position[1] <= 7 and position[0] == 1):
+                    #RED VICTORY ROAD ENTER
+                    if position[1] >= 6 and color == 'red':
+                        if (position[1] != 6 and roll <= 4) or (position[1] != 7 and roll <= 5):
+                            roll -= position[1] - 6
+                            position[1] = 6
+                            self.move(roll, position, color)
+                    #OTHER SITUATIONS
+                    elif position[1] - roll < 5:
+                        roll -= position[1] - 5
+                        position[1] = 5
+                        self.move(roll, position, color)
+                    else:
+                        position[1] -= roll
+                #YELLOW VICTORY ROAD
+                elif (position[0] == 6 and position[1] == 11 and color == 'yellow'):
+                    if roll <= 4:
+                        position[1] -= roll
+                        self.move(roll, position, color)
+                elif position[0] == 6 and color == "yellow":
+                    if position[1] - 7 >= roll:
+                        position[1] -= roll
+
+                # ======== MOVE DOWN ======== 
+                elif (position[0] == 7 and position[1] <= 5):
+                    if position[1] + roll > 5:
+                        roll -= 5 - position[1]
+                        position[1] = 5
+                        self.move(roll, position, color)
+                    else:
+                        position[1] += roll                  
+                elif (position[0] == 7 and position[1] >= 7):
+                    if position[1] + roll > 11:
+                        roll -= 11 - position[1]
+                        position[1] = 11
+                        self.move(roll, position, color)
+                    else:
+                        position[1] += roll           
+                elif (position[1] >= 5 and position[1] <= 7 and position[0] == 11):
+                    #GREEN VICTORY ROAD ENTER
+                    if position[1] <= 6 and color == 'green':
+                        if (position[1] != 6 and roll <= 4) or (position[1] != 5 and roll <= 5):
+                            roll -= 6 - position[1]
+                            position[1] = 6
+                            self.move(roll, position, color)
+                    #OTHER SITUATIONS
+                    elif position[1] + roll > 7:
+                        roll -= 7 - position[1]
+                        position[1] = 7
+                        self.move(roll, position, color)
+                    else:
+                        position[1] += roll
+                #BLUE VICTORY ROAD
+                elif (position[0] == 6 and position[1] == 11 and color == 'blue'):
+                    if roll <= 4:
+                        position[1] += roll
+                        self.move(roll, position, color)
+                elif position[0] == 6 and color == 'blue':
+                    if 5 - position[1] >= roll:
+                        position[1] += roll
+                else:
+                    Error_Label = Label(text=self.languages["cannot_move_0"][self.chosen_language] + self.languages[color][self.chosen_language] + self.languages["cannot_move_1"][self.chosen_language] +  f"{self.select_counter}! [{position[0], position[1]}]").grid(column=1, row = 12, columnspan=11)
+                    #self.languages["title"][self.chosen_language]
+            else:
+                Error_Label = Label(text=self.languages["roll_smaller_0"][self.chosen_language]).grid(column=1, row = 12, columnspan=11)    
+
+            if position[0] > 11 or position[0] < 1 or position[1] > 11 or position[1] < 1: #Error Counter out of the board
+                Error_Label = Label(text=f"ERROR! - {color} counter {self.real_player[self.chosen_index].chosen_counter}! [{position[0], position[1]}]. Function try to move counter out of the board").grid(column=12, row = 10, columnspan=11)                
+
+    def check_dock(self, roll, position, color):
+            move_further = 0
             #Counter is in dock
             for pos in self.dock_pos[color]:
                 if position == list(pos) and roll == 6:
@@ -506,220 +642,10 @@ class Ludo:
                         self.real_player[self.chosen_index].counters[self.real_player[self.chosen_index].chosen_counter].is_inside = False
                     else:
                         self.virtual_player[self.chosen_index].counters[self.virtual_player[self.chosen_index].chosen_counter].is_inside = False
-                    stop = 1
+                    move_further = 1
                     break
-            while(stop == 0): 
-                # ======== MOVE LEFT ======== 
-                if roll == 0:
-                    break    
-                elif roll < 0:
-                    Error_Label = Label(text=f"ERROR! - Roll is smaller than 0!").grid(column=1, row = 12, columnspan=11)
-
-                elif (position[0] > 7 and position[1] == 7):
-                    if position[0] - roll < 7:
-                        roll -= position[0] - 7
-                        position[0] = 7
-
-                    else:
-                        position[0] -= roll
-                        break
-                elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
-                    if position[0] - roll < 0:
-                        roll -= position[0] - 1
-                        position[0] = 1
-                        
-                    else:
-                        position[0] -= roll
-                        break
-                elif (position[0] > 5 and position[0] <= 7 and position[1] == 11):
-                    #YELLOW VICTOR ROAD ENTER
-                    if position[0] >= 6 and color == 'yellow':
-                        if position[0] == 6 and roll > 4:
-                                break
-                        elif position[0] == 7 and roll > 5:
-                                break
-                        elif position[0] == 6 and roll < 5:
-                            position[1] -= roll
-                            break
-                        else:
-                            roll -= position[0] - 6
-                            position[0] = 6
-                            
-                    #OTHER SITUATIONS
-                    elif position[0] - roll < 5:
-                        roll -= position[0] - 5
-                        position[0] = 5
-                        
-                    else:
-                        position[0] -= roll
-                        break
-                #GREEN VICTORY ROAD
-                elif (position[0] == 11 and position[1] == 6 and color == 'green'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[0] -= roll
-                elif position[0] == 7 and position[1] == 6:
-                    break
-                elif position[1] == 6 and color == "green":
-                    if position[0] - 7 < roll:
-                        break
-                    else:
-                        position[0] -= roll
-                        break
-
-                # ======== MOVE RIGHT ======== 
-                elif (position[0] < 5 and position[1] == 5):
-                    if position[0] + roll > 5:
-                        roll -= 5 - position[0]
-                        position[0] = 5
-                    else:
-                        position[0] += roll
-                        break                    
-                elif (position[0] >= 7 and position[0] < 11 and position[1] == 5):
-                    if position[0] + roll > 12:
-                        roll -= 11 - position[0]
-                        position[0] = 11
-                    else:
-                        position[0] += roll
-                        break            
-                elif (position[0] >= 5 and position[0] < 7 and position[1] == 1):
-                    #BLUE VICTOR ROAD ENTER
-                    if position[0] <= 6 and color == 'blue':
-                        if position[0] == 6 and roll > 4:
-                                break
-                        elif position[0] == 5 and roll > 5:
-                                break
-                        elif position[0] == 6 and roll <= 4:
-                            position[1] += roll 
-                            break
-                        else:
-                            roll -= 6 - position[0]
-                            position[0] = 6
-                    #OTHER SITUATIONS
-                    elif position[0] + roll >= 7:
-                        roll -= 7 - position[0]
-                        position[0] = 7
-                    else:
-                        position[0] += roll
-                        break
-                #RED VICTORY ROAD
-                elif (position[0] == 1 and position[1] == 6 and color == 'red'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[0] += roll
-                        break
-                elif position[0] == 5 and position[1] == 6:
-                    break
-                elif position[1] == 6 and position[0] < 5 and color =='red':
-                    if 5 - position[0] < roll:
-                        break
-                    else:
-                        position[0] += roll
-                        break
-                
-                # ======== MOVE UP ======== 
-                elif (position[0] == 5 and position[1] >= 7):
-                    if position[1] - roll <= 7:
-                        roll -= position[1] - 7
-                        position[1] = 7
-                    else:
-                        position[1] -= roll
-                        break                    
-                elif (position[0] == 5 and position[1] <= 5):
-                    if position[1] - roll <= 0:
-                        roll -= position[1] - 1
-                        position[1] = 1
-                    else:
-                        position[1] -= roll
-                        break            
-                elif (position[1] >= 5 and position[1] <= 7 and position[0] == 1):
-                    #RED VICTORY ROAD ENTER
-                    if position[1] >= 6 and color == 'red':
-                        if position[1] == 6 and roll > 4:
-                                break
-                        elif position[1] == 7 and roll > 5:
-                                break
-                        else:
-                            roll -= position[1] - 6
-                            position[1] = 6
-                    #OTHER SITUATIONS
-                    elif position[1] - roll < 5:
-                        roll -= position[1] - 5
-                        position[1] = 5
-                    else:
-                        position[1] -= roll
-                        break
-                #YELLOW VICTORY ROAD
-                elif (position[0] == 6 and position[1] == 11 and color == 'yellow'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[1] -= roll
-                elif position[0] == 6 and position[1] == 7:
-                    break
-                elif position[0] == 6 and color == "yellow":
-                    if position[1] - 7 < roll:
-                        break
-                    else:
-                        position[1] -= roll
-                        break
-
-                # ======== MOVE DOWN ======== 
-                elif (position[0] == 7 and position[1] <= 5):
-                    if position[1] + roll > 5:
-                        roll -= 5 - position[1]
-                        position[1] = 5
-                    else:
-                        position[1] += roll
-                        break                    
-                elif (position[0] == 7 and position[1] >= 7):
-                    if position[1] + roll > 11:
-                        roll -= 11 - position[1]
-                        position[1] = 11
-                    else:
-                        position[1] += roll
-                        break            
-                elif (position[1] >= 5 and position[1] <= 7 and position[0] == 11):
-                    #GREEN VICTORY ROAD ENTER
-                    if position[1] <= 6 and color == 'green':
-                        if position[1] == 6 and roll > 4:
-                                break
-                        elif position[1] == 5 and roll > 5:
-                                break
-                        else:
-                            roll -= 6 - position[1]
-                            position[1] = 6
-                    #OTHER SITUATIONS
-                    elif position[1] + roll > 7:
-                        roll -= 7 - position[1]
-                        position[1] = 7
-                    else:
-                        position[1] += roll
-                        break
-                #BLUE VICTORY ROAD
-                elif (position[0] == 6 and position[1] == 11 and color == 'blue'):
-                    if roll > 4:
-                        break
-                    else:
-                        position[1] += roll
-                elif position[0] == 6 and position[1] == 5:
-                    break
-                elif position[0] == 6 and color == 'blue':
-                    if 5 - position[1] < roll:
-                        break
-                    else:
-                        position[1] += roll
-                        break
-                else:
-                    Error_Label = Label(text=f"ERROR! - Cannot move {color} counter number {self.select_counter}! [{position[0], position[1]}]").grid(column=1, row = 12, columnspan=11)
-                    break
-                
-
-            if position[0] > 11 or position[0] < 1 or position[1] > 11 or position[1] < 1: #Error Counter out of the board
-                Error_Label = Label(text=f"ERROR! - {color} counter {self.real_player[self.chosen_index].chosen_counter}! [{position[0], position[1]}]. Function try to move counter out of the board").grid(column=12, row = 10, columnspan=11)                
-            print(f"MOVE => POSITION UPDATE: X = {position[0]} | Y = {position[1]}")
+            if move_further == 0:
+                self.move(roll, position, color)
             self.update_counters_pos()
 
     def side_panel(self):
@@ -728,11 +654,11 @@ class Ludo:
                           ("3", 3),
                           ("4", 4)]
     
-        button_roll = Button(board, text = "Roll", padx=18, command=self.dice, state=self.hide_roll_button)
+        button_roll = Button(board, text = self.languages["roll"][self.chosen_language], padx=18, command=self.dice, state=self.hide_roll_button)
         self.update_dice_img()
 
         button_roll.grid(column=0, row=3)
-        chosen_color_label = Label(text=f"Chosen color:\n{self.chosen_color}", bg = self.chosen_color).grid(column=0, row =1)
+        chosen_color_label = Label(text= self.languages["chosen_color"][self.chosen_language] + f":\n{self.languages[self.chosen_color][self.chosen_language]}", bg = self.chosen_color).grid(column=0, row =1)
 
         selected_counter = IntVar()
         selected_counter.set(self.select)
@@ -742,24 +668,24 @@ class Ludo:
             Radiobutton(board, text=text, variable= selected_counter, value=mode).grid(column=0, row=5 + i)
             i += 1
 
-        save_button = Button(board, text="Save&Quit", command= self.save_game)
-        save_button.grid(column=0, row=10)
+        save_button = Button(board, text=self.languages["save_game"][self.chosen_language], command=self.save_game())
+        save_button.grid(column=0, row=9)
 
-        choose_counter_button = Button(board, text="Move Counter", state=self.hide_select_button,command=lambda:self.select_counter(selected_counter.get()-1))
-        choose_counter_button.grid(column=0, row=9)
+        choose_counter_button = Button(board, text=self.languages["move_counter"][self.chosen_language], state=self.hide_select_button,command=lambda:self.select_counter(selected_counter.get()-1))
+        choose_counter_button.grid(column=0, row=10)
 
         #Scoreboard
-        score_title_label = Label(text="Scoreboard:").grid(row=1, column=12, sticky=S)
+        score_title_label = Label(text=self.languages["scoreboard"][self.chosen_language] + ":").grid(row=1, column=12, sticky=S)
         scoreboard= ""
         p_number = 0
         for player in self.real_player:
             p_number += 1
-            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p" + f"- {player.podium}"
+            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + self.languages[player.color][self.chosen_language] + " - " + f"{player.points}p" + f"- {player.podium}"
             if p_number !=4:
                 scoreboard += "\n"
         for player in self.virtual_player:
             p_number += 1
-            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + player.color + " - " + f"{player.points}p" + f"{player.podium}"
+            scoreboard += "[" + str(p_number) + "] " + player.nickname + " - " + self.languages[player.color][self.chosen_language] + " - " + f"{player.points}p" + f"{player.podium}"
             if p_number !=4:
                 scoreboard += "\n"
         score_label = Label(text=scoreboard).grid(row=2, column=12, sticky=SW)
@@ -767,12 +693,12 @@ class Ludo:
         #Counters position
         
         if self.show_counters_pos == True:
-            counters_title_label = Label(text="Counters positions:").grid(row=3, column=12, sticky=S)
+            counters_title_label = Label(text= self.languages["counter_position"][self.chosen_language] + ":").grid(row=3, column=12, sticky=S)
             p_number = 0
             for player in self.real_player:
                 pos_text= ""
                 for i in range(4):
-                    pos_text += f"[{player.color}][{player.counters[i].number}] -> [{player.counters[i].position[0]}, {player.counters[i].position[1]}]"
+                    pos_text += f"[{self.languages[player.color][self.chosen_language]}][{player.counters[i].number}] -> [{player.counters[i].position[0]}, {player.counters[i].position[1]}]"
                     if i !=3:
                         pos_text += "\n"
                 pos_label = Label(text=pos_text, anchor=SW).grid(row=4 + p_number, column=12, sticky=SW)
@@ -782,44 +708,46 @@ class Ludo:
         prev_window.destroy()
         prev_window.quit()
         window = Tk()
-        window.title("Ludo Board Game - Add Player")
+        window.title(self.languages["title"][self.chosen_language])
         window.geometry("392x410")
-        types = ["Real", "Virtual"]
-        types_dict = {"Real":True, "Virtual":False}
+        types_dict = {"real":True, "virtual":False}
 
         img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
         logo_label = Label(window, image=img_logo).grid(row=0, column = 0, columnspan =2)
 
-        nickname_label = Label(window, text="Nickname: ").grid(row=1, column = 0, sticky=E, padx = 5)
+        nickname_label = Label(window, text= self.languages["nickname"][self.chosen_language] + ": ").grid(row=1, column = 0, sticky=E, padx = 5)
         nickname_entry = Entry(window, width=10)
         nickname_entry.grid(row=1, column=1, sticky=W, padx = 5)
-        nickname_entry.insert(0, "Player")
+        nickname_entry.insert(0, self.languages["player"][self.chosen_language])
 
         color = StringVar()
-        color.set(self.colors[0])
-        color_label = Label(window, text = "Color: ").grid(row=2, column=0, sticky=E, padx = 5)
-        choose_color = OptionMenu(window, color, *self.colors)
+        color.set(self.languages["colors"][self.chosen_language][0])
+        color_label = Label(window, text = self.languages["color"][self.chosen_language] + ": ").grid(row=2, column=0, sticky=E, padx = 5)
+        choose_color = OptionMenu(window, color, *self.languages["colors"][self.chosen_language])
         choose_color.grid(row=2, column=1, sticky=W, padx = 5)
 
         type = StringVar()
-        type.set(types[0])
-        type_label = Label(window, text = "Type: ").grid(row=3, column=0, sticky=E, padx = 5)
-        choose_type = OptionMenu(window, type, *types)
+        type.set(self.languages["types"][self.chosen_language][0])
+        type_label = Label(window, text = self.languages["type"][self.chosen_language] + ": ").grid(row=3, column=0, sticky=E, padx = 5)
+        choose_type = OptionMenu(window, type, *self.languages["types"][self.chosen_language])
         choose_type.grid(row=3, column=1, sticky=W, padx = 5)
 
-        choose_button = Button(window, text="Add Player", command=lambda:self.add_player(color.get().lower(), types_dict[type.get()], nickname_entry.get(), window), padx=20)
+        choose_button = Button(window, text=self.languages["add_player"][self.chosen_language], command=lambda:self.add_player(self.color_types_dict[color.get()], types_dict[self.color_types_dict[type.get()]], nickname_entry.get(), window), padx=20)
         choose_button.grid(row=4, column=0, sticky=E, padx = 5)
-        start_button = Button(window, text="Start Game", command=lambda:self.board_init(window), padx=20)
+        start_button = Button(window, text=self.languages["start_game"][self.chosen_language], command=lambda:self.board_init(window), padx=20)
         start_button.grid(row=4, column=1, sticky=W, padx = 5)
 
         window.mainloop()
 
     def end_window(self):
         end = Toplevel(board)
-        end.title("Ludo Board Game - Winners!")
+        end.title(self.languages["title"][self.chosen_language])
         global podium_img
         podium_img = ImageTk.PhotoImage(Image.open("podium.png"))
         podium_label = Label(master=end, image=podium_img).grid(row=0, column = 1, columnspan = 3, rowspan = 2)
+
+        self.save_leaders()
+
         for player in self.real_player:
             if player.podium == 1:
                 first_label = Label(master=end, text=f"1.{player.nickname}\n{player.points} points").grid(row = 0, column = 2)
@@ -863,14 +791,14 @@ class Ludo:
 
     def board_init(self, prev_window):
         if (len(self.real_player) + len(self.virtual_player)) == 0:
-            M1 = Label(prev_window, text="There are no players!").grid(row=5, column = 0, columnspan=2)
+            M1 = Label(prev_window, text=self.languages["no_players"][self.chosen_language]).grid(row=5, column = 0, columnspan=2)
         else:
             self.start_game = True
             prev_window.destroy()
             prev_window.quit()
             global board
             board = Tk()
-            board.title("Ludo Board Game")
+            board.title(self.languages["title"][self.chosen_language])
             img_board = ImageTk.PhotoImage(Image.open("board/board.png"))
             adjust_label = []
             adjust_block = ImageTk.PhotoImage(Image.open("board/adjust_block.png"))
@@ -995,7 +923,7 @@ class Ludo:
             self.update_counters_pos()
             self.control_game()
 
-            button_quit = Button(board, text = "End", command = board.quit, padx=30).grid(column=0, row = 11)           
+            button_quit = Button(board, text = self.languages["end"][self.chosen_language], command = board.quit, padx=30).grid(column=0, row = 11)           
 
             board.mainloop()
 
@@ -1020,20 +948,20 @@ class Ludo:
     def options_menu(self, prev_window):
         prev_window.destroy()
         start = Tk()
-        start.title("Ludo Board Game")
+        start.title(self.languages["title"][self.chosen_language])
         global img_logo
         img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
         logo_label = Label(start, image=img_logo).grid(row=0, column = 0, columnspan=2)
 
         #Choose Language
-        language_label = Label(start, text = "Language:").grid(row=1, column = 0, sticky = E, padx = 5)
+        language_label = Label(start, text = self.languages["language"][self.chosen_language] + ":").grid(row=1, column = 0, sticky = E, padx = 5)
         select_language = StringVar()
         select_language.set(self.languages["languages"][self.chosen_language])
         choose_language = OptionMenu(start, select_language, *self.languages["languages"])
         choose_language.grid(row=1, column=1, sticky=W, padx = 5)
 
         #Show Counters position
-        counters_pos_label = Label(start, text = "Show counters positions:").grid(row=2, column = 0, sticky = E, padx = 5)
+        counters_pos_label = Label(start, text = self.languages["show_counters_pos"][self.chosen_language] + ":").grid(row=2, column = 0, sticky = E, padx = 5)
         select_counters_pos = StringVar()
         if self.show_counters_pos == True:
             select_counters_pos.set(self.languages["lan_yes"][self.chosen_language])
@@ -1042,27 +970,92 @@ class Ludo:
         show_counters = OptionMenu(start, select_counters_pos, *(self.languages["lan_yes"][self.chosen_language], self.languages["lan_no"][self.chosen_language]))
         show_counters.grid(row=2, column=1, sticky=W, padx = 5)
 
-        save_button = Button(start, text="Save changes", command=lambda:self.set_options(start, select_language.get(), select_counters_pos.get())).grid(row = 5, column=0)
-        discard_button = Button(start, text="Discard changes", command=lambda:self.back_to_menu(start)).grid(row=5, column=1)
+        save_button = Button(start, text=self.languages["save"][self.chosen_language], command=lambda:self.set_options(start, select_language.get(), select_counters_pos.get())).grid(row = 5, column=0)
+        discard_button = Button(start, text=self.languages["discard"][self.chosen_language], command=lambda:self.back_to_menu(start)).grid(row=5, column=1)
 
-    def leadership(self, start):
-        start.destroy()
+    def leadership(self, prev_window):
+        prev_window.destroy()
+        start = Tk()
+        start.title(self.languages["title"][self.chosen_language])
+        global img_logo
+        img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
+
+        try:
+            conn = sqlite3.connect('leaders.db')
+            c = conn.cursor()
+            c.execute("SELECT *, oid FROM players")
+            records = c.fetchall()
+            logo_label = Label(start, image=img_logo).grid(row=0, column = 0, columnspan=3)
+            score_label = Label(start, text=self.languages["scoreboard"][self.chosen_language]).grid(row=1, column=1)
+
+            list_of_players = ""
+            for player in records:
+                list_of_players += f"[{player[3]}] {player[0]} - {player[1]} => {player[2]} points.\n"
+            score_list_label = Label(start, text=list_of_players).grid(row=2,column=1)
+            c.close()
+        except:
+            Error_label = Label(start, text=self.languages["no_leaders"][self.chosen_language]).grid(row=2,column=1)
+
+
+        back_btn = Button(start, text=self.languages["back"][self.chosen_language], command = lambda:self.back_to_menu(start)).grid(row=3, column=1, pady=5)
+
+
+        start.mainloop()
 
     def load_game(self, start):
-        return
+        conn = sqlite3.connect('saved_game.db')
+        c = conn.cursor()
+        c.execute("SELECT *, oid FROM players")
+        records = c.fetchall()
+        for player in records:
+            if player[2] == 'real':
+                is_real = True
+                players_number = len(self.real_player)
+            else:
+                is_real = False
+                players_number = len(self.virtual_player)
+
+            self.add_player(player[1], is_real, player[0], start)
+
+            if is_real == True:
+                self.real_player[players_number].points = player[3]
+                self.real_player[players_number].podium = player[4]
+                #COUNTER ONE
+                self.real_player[players_number].counters[0].position[0] = player[5]
+                self.real_player[players_number].counters[0].position[1] = player[6]
+                self.real_player[players_number].counters[1].position[0] = player[7]
+                self.real_player[players_number].counters[1].position[1] = player[8]
+                self.real_player[players_number].counters[2].position[0] = player[9]
+                self.real_player[players_number].counters[2].position[1] = player[10]
+                self.real_player[players_number].counters[3].position[0] = player[11]
+                self.real_player[players_number].counters[3].position[1] = player[12]
+            else:
+                self.virtual_player[players_number].points = player[3]
+                self.virtual_player[players_number].podium = player[4]
+                #COUNTER ONE
+                self.virtual_player[players_number].counters[0].position[0] = player[5]
+                self.virtual_player[players_number].counters[0].position[1] = player[6]
+                self.virtual_player[players_number].counters[1].position[0] = player[7]
+                self.virtual_player[players_number].counters[1].position[1] = player[8]
+                self.virtual_player[players_number].counters[2].position[0] = player[9]
+                self.virtual_player[players_number].counters[2].position[1] = player[10]
+                self.virtual_player[players_number].counters[3].position[0] = player[11]
+                self.virtual_player[players_number].counters[3].position[1] = player[12]
+        conn.close()
+        self.board_init(start)        
 
     def main_menu(self):
         start = Tk()
-        start.title("Ludo Board Game")
-        load_game_status = DISABLED
+        start.title(self.languages["title"][self.chosen_language])
+        load_game_status = NORMAL
 
         img_logo = ImageTk.PhotoImage(Image.open("logo.png"))
         logo_label = Label(start, image=img_logo).grid(row=0, column = 0)
-        new_game_button = Button(start, text="New Game", command = lambda:self.new_game_menu(start), padx = 20).grid(row=1, column=0, pady=5)
-        load_game_button = Button(start, text="Load Game", command = lambda:self.load_game(start), state=load_game_status, padx=18).grid(row=2, column=0, pady=5)
-        leadership_button = Button(start, text="Leadership Board", command = lambda:self.leadership(start), padx = 2).grid(row=3, column=0, pady=5)
-        options_button = Button(start, text="Options", command = lambda:self.options_menu(start), padx = 27).grid(row=4, column=0, pady=5)
-        end_button = Button(start, text="End", command = start.quit, padx = 38).grid(row=5, column = 0, pady=5)
+        new_game_button = Button(start, text=self.languages["new_game"][self.chosen_language], command = lambda:self.new_game_menu(start), padx = 20).grid(row=1, column=0, pady=5)
+        load_game_button = Button(start, text=self.languages["load_game"][self.chosen_language], command = lambda:self.load_game(start), state=load_game_status, padx=18).grid(row=2, column=0, pady=5)
+        leadership_button = Button(start, text=self.languages["scoreboard"][self.chosen_language], command = lambda:self.leadership(start), padx = 2).grid(row=3, column=0, pady=5)
+        options_button = Button(start, text=self.languages["options"][self.chosen_language], command = lambda:self.options_menu(start), padx = 27).grid(row=4, column=0, pady=5)
+        end_button = Button(start, text=self.languages["end"][self.chosen_language], command = start.quit, padx = 38).grid(row=5, column = 0, pady=5)
 
         start.mainloop()
 
