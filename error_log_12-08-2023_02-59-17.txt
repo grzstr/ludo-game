@@ -1,0 +1,7 @@
+12/08/02:59:35 02:59:35 - Ta nazwa ju¿ zosta³a wykorzystana!
+12/08/02:59:37 02:59:37 - Ta nazwa ju¿ zosta³a wykorzystana!
+12/08/02:59:37 02:59:37 - Ta nazwa ju¿ zosta³a wykorzystana!
+12/08/02:59:39 02:59:39 - Ta nazwa ju¿ zosta³a wykorzystana!
+12/08/02:59:39 02:59:39 - Ta nazwa ju¿ zosta³a wykorzystana!
+12/08/02:59:39 02:59:39 - Ta nazwa ju¿ zosta³a wykorzystana!
+12/08/03:00:07 03:00:07 - B£¥D! - Wyrzucono liczbê mniejsz¹ ni¿ 0

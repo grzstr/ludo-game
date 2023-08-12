@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import  _get_default_root
+from datetime import datetime
 import time
 import random
 from PIL import ImageTk, Image
@@ -74,6 +75,10 @@ class Ludo:
         self.chosen_language = 0
         self.show_counters_pos = False
         self.show_board_pos = False
+        self.show_errors = False
+        self.developer_mode = False
+        now = datetime.now()
+        self.start_data_time = now.strftime("%d-%m-%Y_%H-%M-%S")
         
         self.start_pos = {"red":(1, 5), 
                           "blue":(7, 1), 
@@ -157,6 +162,8 @@ class Ludo:
                             "language": ("Language", "Język"),
                             "show_counters_pos": ("Show counters positions", "Pokaż pozycję pionków"),
                             "show_board_pos": ("Load board with boxes coordinates", "Wczytaj planszę z koordynatami pól"),
+                            "show_dev_mode": ("Developer mode", "Tryb developerski"),
+                            "show_errors": ("Show error messages", "Wyświetl komunikaty o błędach"),
                             "save": ("Save changes", "Zapisz zmiany"),
                             "discard": ("Discard changes", "Niezapisuj zmian"),
 
@@ -180,9 +187,24 @@ class Ludo:
                             
                             #CANNOT MOVE COUNTER NUMBER
                             "cannot_move_0": ("ERROR! - Cannot move", "Błąd nie można ruszyć"),
-                            "cannot_move_1": ("counter number", "pionka numer")
+                            "cannot_move_1": ("counter number", "pionka numer"),
+                            "kill_1": ("Token", "Pionek"), 
+                            "kill_2": ("was beaten by the", "został zbity przez pionek")
 
                             }
+
+    def error_log(self, error_text, which_window = 1):
+        if which_window == 0: #ADD PLAYER WINDOW
+           Error_Label = Label(text=error_text).grid(column=0, row = 5, columnspan= 2)         
+        if which_window == 1:  # BOARD WINDOW
+            if self.show_errors == True:
+                Error_Label = Label(text=error_text).grid(column=12, row = 10)        
+        if which_window == 3:  # BOARD WINDOW KILL
+            Error_Label = Label(text=error_text).grid(column=11, row = 10)          
+        date = datetime.now()
+        file = open("error_log_" + self.start_data_time + ".txt", "a")
+        file.write(date.strftime("%d/%m/%T %H:%M:%S")  + " - " + error_text + "\n")
+        file.close()
 
     def tksleep(self, t):
         ms = int(t*1000)
@@ -364,6 +386,7 @@ class Ludo:
                 new_nickname = nickname
                 new_nickname += " " + str(i)
                 Error_label = Label(window, text=self.languages["used_name"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
+                self.error_log(self.languages["used_name"][self.chosen_language])
             else:
                 nickname = new_nickname
                 self.used_nicknames.append(nickname)
@@ -374,7 +397,7 @@ class Ludo:
         if len(self.real_player)+len(self.virtual_player) < 4:
             if color in self.colors:
                 if color in self.used_colors:
-                    Error_label = Label(window, text=self.languages["used_color"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
+                    self.error_log(self.languages["used_color"][self.chosen_language], 0)
                 else:
                     nickname = self.check_nickname(nickname, window)
                     self.used_colors.append(color)
@@ -383,9 +406,9 @@ class Ludo:
                     else:
                         self.virtual_player.append(Virtual_Player(color, self.dock_pos, self.end_pos, nickname))
             else:
-                Error_label = Label(window, text=self.languages["wrong_color"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
+                self.error_log(self.languages["wrong_color"][self.chosen_language], 0)
         else:
-            Error_label = Label(window, text=self.languages["four_players"][self.chosen_language]).grid(row=5, column=0, columnspan=2)
+            self.error_log(self.languages["four_players"][self.chosen_language], 0)
 
         for x in range(len(self.real_player)):
             players_number_label = Label(window, text=f"[{len(self.real_player)+len(self.virtual_player)}]: {self.real_player[x].nickname}, {self.languages['types'][self.chosen_language][0]}, {self.languages[self.real_player[x].color][self.chosen_language]}")
@@ -405,8 +428,10 @@ class Ludo:
         self.update_dice_img()
         if self.chosen_type == "real":
             self.hide_select_button = NORMAL
-        #self.hide_roll_button = DISABLED
-        self.hide_roll_button = NORMAL
+        if self.developer_mode == False:
+            self.hide_roll_button = DISABLED
+        else:
+            self.hide_roll_button = NORMAL
         self.side_panel()
 
     def kill(self):
@@ -425,6 +450,7 @@ class Ludo:
                             player.points -= 15
                             second_player.points += 20
                             player.in_dock += 1
+                            self.error_log(self.languages["kill_1"][self.chosen_language] + " " + self.languages[player.color][self.chosen_language] + " " + self.languages["kill_2"][self.chosen_language] + " " + self.languages[second_player.color][self.chosen_language], 3)
         for player in self.virtual_player:
             if player.color != second_player.color and self.chosen_type == "virtual":
                 for evil_counter in player.counters:
@@ -436,12 +462,13 @@ class Ludo:
                             player.points -= 15
                             player.in_dock += 1
                             second_player.points += 20
+                            self.error_log(self.languages["kill_1"][self.chosen_language] + " " + self.languages[player.color][self.chosen_language] + " " + self.languages["kill_2"][self.chosen_language] + " " + self.languages[second_player.color][self.chosen_language], 3)
         self.update_counters_pos()
 
     def winner(self):
         if self.chosen_type == "real":
             if self.real_player[self.chosen_index].color in self.winners:
-                print("ERROR - Color is in winners!")
+                self.error_log("ERROR - Color is in winners!")
             else:
                 total = 0
                 for counter in self.real_player[self.chosen_index].counters:
@@ -462,7 +489,7 @@ class Ludo:
                         self.real_player[self.chosen_index].points += 50
         else:
             if self.virtual_player[self.chosen_index].color in self.winners:
-                print("ERROR - Color is in winners!")       
+                self.error_log("ERROR - Color is in winners!")    
             else:
                 total = 0
                 for counter in self.virtual_player[self.chosen_index].counters:
@@ -537,21 +564,21 @@ class Ludo:
                 i += 1
                 self.adjust_counter_position(y, i, x.color)
 
-    def move(self, roll, position, color):
+    def move(self, roll, position, color, old_position, old_roll):
             if roll > 0:
                 # ======== MOVE LEFT ======== 
                 if (position[0] > 7 and position[1] == 7):
                     if position[0] - roll < 7:
                         roll -= position[0] - 7
                         position[0] = 7
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[0] -= roll
                 elif (position[0] <= 5 and position[0] > 1 and position[1] == 7):
                     if position[0] - roll < 0:
                         roll -= position[0] - 1
                         position[0] = 1
-                        self.move(roll, position, color)                
+                        self.move(roll, position, color, old_position, old_roll)                
                     else:
                         position[0] -= roll
                 elif (position[0] > 5 and position[0] <= 7 and position[1] == 11):
@@ -562,19 +589,19 @@ class Ludo:
                         elif (position[0] != 6 and roll <= 4) or (position[0] != 7 and roll <= 5):
                             roll -= position[0] - 6
                             position[0] = 6
-                            self.move(roll, position, color)                        
+                            self.move(roll, position, color, old_position, old_roll)                        
                     #OTHER SITUATIONS
                     elif position[0] - roll < 5:
                         roll -= position[0] - 5
                         position[0] = 5
-                        self.move(roll, position, color)                    
+                        self.move(roll, position, color, old_position, old_roll)                    
                     else:
                         position[0] -= roll
                 #GREEN VICTORY ROAD
                 elif (position[0] == 11 and position[1] == 6 and color == 'green'):
                     if roll <= 4:
                         position[0] -= roll
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                 elif position[1] == 6 and color == "green" and  position[0] != 7:
                     if position[0] - 7 >= roll:
                         position[0] -= roll
@@ -584,14 +611,14 @@ class Ludo:
                     if position[0] + roll > 5:
                         roll -= 5 - position[0]
                         position[0] = 5
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[0] += roll           
                 elif (position[0] >= 7 and position[0] < 11 and position[1] == 5):
                     if position[0] + roll > 12:
                         roll -= 11 - position[0]
                         position[0] = 11
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[0] += roll        
                 elif (position[0] >= 5 and position[0] < 7 and position[1] == 1):
@@ -602,12 +629,12 @@ class Ludo:
                         elif (position[0] != 6 and roll <= 4) or (position[0] != 5 and roll <= 5):
                             roll -= 6 - position[0]
                             position[0] = 6
-                            self.move(roll, position, color)
+                            self.move(roll, position, color, old_position, old_roll)
                     #OTHER SITUATIONS
                     elif position[0] + roll >= 7:
                         roll -= 7 - position[0]
                         position[0] = 7
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[0] += roll
                 #RED VICTORY ROAD
@@ -623,14 +650,14 @@ class Ludo:
                     if position[1] - roll <= 7:
                         roll -= position[1] - 7
                         position[1] = 7
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[1] -= roll                  
                 elif (position[0] == 5 and position[1] <= 5):
                     if position[1] - roll <= 0:
                         roll -= position[1] - 1
                         position[1] = 1
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[1] -= roll       
                 elif (position[1] >= 5 and position[1] <= 7 and position[0] == 1):
@@ -639,19 +666,19 @@ class Ludo:
                         if (position[1] != 6 and roll <= 4) or (position[1] != 7 and roll <= 5):
                             roll -= position[1] - 6
                             position[1] = 6
-                            self.move(roll, position, color)
+                            self.move(roll, position, color, old_position, old_roll)
                     #OTHER SITUATIONS
                     elif position[1] - roll < 5:
                         roll -= position[1] - 5
                         position[1] = 5
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[1] -= roll
                 #YELLOW VICTORY ROAD
                 elif (position[0] == 6 and position[1] == 11 and color == 'yellow'):
                     if roll <= 4:
                         position[1] -= roll
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                 elif position[0] == 6 and color == "yellow":
                     if position[1] - 7 >= roll:
                         position[1] -= roll
@@ -661,14 +688,14 @@ class Ludo:
                     if position[1] + roll > 5:
                         roll -= 5 - position[1]
                         position[1] = 5
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[1] += roll                  
                 elif (position[0] == 7 and position[1] >= 7):
                     if position[1] + roll > 11:
                         roll -= 11 - position[1]
                         position[1] = 11
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[1] += roll           
                 elif (position[1] >= 5 and position[1] <= 7 and position[0] == 11):
@@ -677,36 +704,40 @@ class Ludo:
                         if (position[1] != 6 and roll <= 4) or (position[1] != 5 and roll <= 5):
                             roll -= 6 - position[1]
                             position[1] = 6
-                            self.move(roll, position, color)
+                            self.move(roll, position, color, old_position, old_roll)
                     #OTHER SITUATIONS
                     elif position[1] + roll > 7:
                         roll -= 7 - position[1]
                         position[1] = 7
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                     else:
                         position[1] += roll
                 #BLUE VICTORY ROAD
                 elif (position[0] == 6 and position[1] == 11 and color == 'blue'):
                     if roll <= 4:
                         position[1] += roll
-                        self.move(roll, position, color)
+                        self.move(roll, position, color, old_position, old_roll)
                 elif position[0] == 6 and color == 'blue':
                     if 5 - position[1] >= roll:
                         position[1] += roll
                 else:
-                    Error_Label = Label(text=self.languages["cannot_move_0"][self.chosen_language] + self.languages[color][self.chosen_language] + self.languages["cannot_move_1"][self.chosen_language] +  f"{self.select_counter}! [{position[0], position[1]}]").grid(column=1, row = 12, columnspan=11)
-                    #self.languages["title"][self.chosen_language]
+                    #self.error_log(self.languages["cannot_move_0"][self.chosen_language] + self.languages[color][self.chosen_language] + self.languages["cannot_move_1"][self.chosen_language] +  f"{self.select_counter}! [{position[0], position[1]}]")
+                    print()
             else:
-                Error_Label = Label(text=self.languages["roll_smaller_0"][self.chosen_language]).grid(column=1, row = 12, columnspan=11)    
+                self.error_log(self.languages["roll_smaller_0"][self.chosen_language])
 
             if position[0] > 11 or position[0] < 1 or position[1] > 11 or position[1] < 1: #Error Counter out of the board
                 if self.chosen_type == "real":
                     player = self.real_player
                 else:
                     player = self.virtual_player
-                Error_Label = Label(text=f"ERROR! - {color} counter {player[self.chosen_index].chosen_counter}! [{position[0], position[1]}]. Function try to move counter out of the board").grid(column=12, row = 10, columnspan=11)                
+                self.error_log(f"ERROR! - {color} counter {player[self.chosen_index].chosen_counter}! [{position[0], position[1]}]. || OLD POSITION [{old_position[0]}][{old_position[1]}] || ROLL = {roll} | OLD_ROLL = {old_roll} || Function try to move counter out of the board")
 
     def check_dock(self, roll, position, color):
+            old_roll = roll
+            old_position = []
+            old_position.append(position[0])
+            old_position.append(position[1])
             move_further = 0
             #Counter is in dock
             for pos in self.dock_pos[color]:
@@ -722,7 +753,7 @@ class Ludo:
                     move_further = 1
                     break
             if move_further == 0:
-                self.move(roll, position, color)
+                self.move(roll, position, color, old_position, old_roll)
             self.update_counters_pos()
 
     def side_panel(self):
@@ -796,6 +827,16 @@ class Ludo:
                         pos_text += "\n"
                 pos_label = Label(text=pos_text, anchor=SW).grid(row=4 + p_number, column=12, sticky=SW)
                 p_number += 1
+            for player in self.virtual_player:
+                pos_text= ""
+                for i in range(4):
+                    pos_text += f"[{self.languages[player.color][self.chosen_language]}][{player.counters[i].number}] -> [{player.counters[i].position[0]}, {player.counters[i].position[1]}]"
+                    if i !=3:
+                        pos_text += "\n"
+                pos_label = Label(text=pos_text, anchor=SW).grid(row=4 + p_number, column=12, sticky=SW)
+                p_number += 1
+
+
 
     def new_game_menu(self, prev_window):
         prev_window.destroy()
@@ -867,16 +908,17 @@ class Ludo:
                 self.hide_roll_button = DISABLED
                 self.hide_select_button = DISABLED
                 self.hide_radio_buttons = DISABLED
-                self.side_panel()
                 self.dice()
-                self.side_panel()
-                self.tksleep(2)
+                self.tksleep(1)
                 self.select_counter(0)
-                self.tksleep(2)
+                self.side_panel()
+                self.tksleep(1)
             else:
                 self.initialization = False
-                #self.hide_select_button = DISABLED
-                self.hide_select_button = NORMAL
+                if self.developer_mode == False:
+                    self.hide_select_button = DISABLED
+                else:
+                    self.hide_select_button = NORMAL
                 self.hide_roll_button = NORMAL
                 self.hide_radio_buttons = NORMAL
                 self.side_panel()
@@ -1028,17 +1070,29 @@ class Ludo:
 
             board.mainloop()
 
-    def set_options(self, prev_window, language, show_pos, show_board_pos):
+    def set_options(self, prev_window, language, show_pos, show_board_pos, show_dev_mode, show_errors):
         prev_window.destroy()
+
+        if show_errors == self.languages["lan_yes"][self.chosen_language]:
+            self.show_errors = True
+        if show_errors == self.languages["lan_no"][self.chosen_language]:
+            self.show_errors = False
+
+        if show_dev_mode == self.languages["lan_yes"][self.chosen_language]:
+            self.developer_mode = True
+        if show_dev_mode == self.languages["lan_no"][self.chosen_language]:
+            self.developer_mode = False
 
         if show_board_pos == self.languages["lan_yes"][self.chosen_language]:
             self.show_board_pos = True
         if show_board_pos == self.languages["lan_no"][self.chosen_language]:
             self.show_board_pos = False
+
         if show_pos == self.languages["lan_yes"][self.chosen_language]:
             self.show_counters_pos = True
         if show_pos == self.languages["lan_no"][self.chosen_language]:
             self.show_counters_pos = False
+
         if language == self.color_types_dict["languages"][0][0]:
             self.chosen_language = 0
         if language == self.color_types_dict["languages"][0][1]:
@@ -1085,8 +1139,29 @@ class Ludo:
         show_board = OptionMenu(start, select_board_pos, *(self.languages["lan_yes"][self.chosen_language], self.languages["lan_no"][self.chosen_language]))
         show_board.grid(row=3, column=1, sticky=W, padx = 5)
 
-        save_button = Button(start, text=self.languages["save"][self.chosen_language], command=lambda:self.set_options(start, select_language.get(), select_counters_pos.get(), select_board_pos.get())).grid(row = 5, column=0, pady = 5)
-        discard_button = Button(start, text=self.languages["discard"][self.chosen_language], command=lambda:self.back_to_menu(start)).grid(row=5, column=1, pady = 5)
+         #Developer mode
+        dev_mode_label = Label(start, text = self.languages["show_dev_mode"][self.chosen_language] + ":").grid(row=4, column = 0, sticky = E, padx = 5)
+        select_dev_mode = StringVar()
+        if self.developer_mode == True:
+            select_dev_mode.set(self.languages["lan_yes"][self.chosen_language])
+        if self.developer_mode == False:
+            select_dev_mode.set(self.languages["lan_no"][self.chosen_language])
+        show_dev_mode = OptionMenu(start, select_dev_mode, *(self.languages["lan_yes"][self.chosen_language], self.languages["lan_no"][self.chosen_language]))
+        show_dev_mode.grid(row=4, column=1, sticky=W, padx = 5)
+ 
+          #Developer mode
+        show_errors_label = Label(start, text = self.languages["show_errors"][self.chosen_language] + ":").grid(row=5, column = 0, sticky = E, padx = 5)
+        select_show_errors = StringVar()
+        if self.show_errors == True:
+            select_show_errors.set(self.languages["lan_yes"][self.chosen_language])
+        if self.show_errors == False:
+            select_show_errors.set(self.languages["lan_no"][self.chosen_language])
+        show_errors = OptionMenu(start, select_show_errors, *(self.languages["lan_yes"][self.chosen_language], self.languages["lan_no"][self.chosen_language]))
+        show_errors.grid(row=5, column=1, sticky=W, padx = 5)
+
+
+        save_button = Button(start, text=self.languages["save"][self.chosen_language], command=lambda:self.set_options(start, select_language.get(), select_counters_pos.get(), select_board_pos.get(), select_dev_mode.get(), select_show_errors.get())).grid(row = 10, column=0, pady = 5)
+        discard_button = Button(start, text=self.languages["discard"][self.chosen_language], command=lambda:self.back_to_menu(start)).grid(row=10, column=1, pady = 5)
 
     def leadership(self, prev_window):
         prev_window.destroy()
@@ -1109,11 +1184,8 @@ class Ludo:
             score_list_label = Label(start, text=list_of_players).grid(row=2,column=1)
             c.close()
         except:
-            Error_label = Label(start, text=self.languages["no_leaders"][self.chosen_language]).grid(row=2,column=1)
-
-
+            self.error_log(self.languages["no_leaders"][self.chosen_language])
         back_btn = Button(start, text=self.languages["back"][self.chosen_language], command = lambda:self.back_to_menu(start)).grid(row=3, column=1, pady=5)
-
 
         start.mainloop()
 

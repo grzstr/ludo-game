@@ -1,0 +1,118 @@
+12/08/00:18:33 00:18:33 - This nickname has already been used!
+12/08/00:18:37 00:18:37 - This nickname has already been used!
+12/08/00:18:37 00:18:37 - This nickname has already been used!
+12/08/00:18:39 00:18:39 - This nickname has already been used!
+12/08/00:18:39 00:18:39 - This nickname has already been used!
+12/08/00:18:39 00:18:39 - This nickname has already been used!
+12/08/00:19:25 00:19:25 - ERROR! - Roll is smaller than 0!
+12/08/00:20:02 00:20:02 - ERROR! - Roll is smaller than 0!
+12/08/00:20:20 00:20:20 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [8][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:20:26 00:20:26 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:20:32 00:20:32 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:20:36 00:20:36 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:20:37 00:20:37 - ERROR! - Roll is smaller than 0!
+12/08/00:20:43 00:20:43 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:20:47 00:20:47 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:20:52 00:20:52 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:20:53 00:20:53 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:20:59 00:20:59 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:21:04 00:21:04 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:21:08 00:21:08 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:21:14 00:21:14 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:21:15 00:21:15 - ERROR! - Roll is smaller than 0!
+12/08/00:21:19 00:21:19 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:21:25 00:21:25 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:21:33 00:21:33 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:21:34 00:21:34 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [9][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:21:39 00:21:39 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:21:48 00:21:48 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:21:52 00:21:52 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:21:59 00:21:59 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:22:00 00:22:00 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:22:05 00:22:05 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:22:08 00:22:08 - ERROR! - yellow counter 4! [(12, 5)]. || OLD POSITION [9][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:22:10 00:22:10 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:22:14 00:22:14 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:22:19 00:22:19 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:22:25 00:22:25 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:22:29 00:22:29 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:22:34 00:22:34 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:22:38 00:22:38 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:22:43 00:22:43 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:22:44 00:22:44 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:22:49 00:22:49 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:22:50 00:22:50 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:23:02 00:23:02 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:23:07 00:23:07 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:23:08 00:23:08 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:23:13 00:23:13 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:23:17 00:23:17 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:23:19 00:23:19 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:23:22 00:23:22 - ERROR! - Roll is smaller than 0!
+12/08/00:23:24 00:23:24 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:23:28 00:23:28 - ERROR! - Roll is smaller than 0!
+12/08/00:23:31 00:23:31 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:23:36 00:23:36 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:23:41 00:23:41 - ERROR! - Roll is smaller than 0!
+12/08/00:23:42 00:23:42 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:23:46 00:23:46 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:23:52 00:23:52 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:23:57 00:23:57 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:24:01 00:24:01 - ERROR! - Roll is smaller than 0!
+12/08/00:24:02 00:24:02 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:24:07 00:24:07 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:24:12 00:24:12 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:24:21 00:24:21 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:24:28 00:24:28 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:24:32 00:24:32 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:24:39 00:24:39 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:24:41 00:24:41 - ERROR! - Roll is smaller than 0!
+12/08/00:24:45 00:24:45 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:24:53 00:24:53 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:24:59 00:24:59 - ERROR! - Roll is smaller than 0!
+12/08/00:25:00 00:25:00 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:25:05 00:25:05 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:25:10 00:25:10 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:25:15 00:25:15 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:25:18 00:25:18 - ERROR! - Roll is smaller than 0!
+12/08/00:25:19 00:25:19 - ERROR! - yellow counter 2! [(12, 5)]. || OLD POSITION [7][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:25:20 00:25:20 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:25:25 00:25:25 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:25:29 00:25:29 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:25:34 00:25:34 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:25:35 00:25:35 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:25:40 00:25:40 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:25:46 00:25:46 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:25:50 00:25:50 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:25:55 00:25:55 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:25:56 00:25:56 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:26:01 00:26:01 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:26:05 00:26:05 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:26:10 00:26:10 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:26:16 00:26:16 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:26:19 00:26:19 - ERROR! - Roll is smaller than 0!
+12/08/00:26:21 00:26:21 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:26:22 00:26:22 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:26:26 00:26:26 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:26:28 00:26:28 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:26:32 00:26:32 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:26:38 00:26:38 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:26:44 00:26:44 - ERROR! - yellow counter 3! [(12, 5)]. || OLD POSITION [7][4] || ROLL = 5 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:26:44 00:26:44 - ERROR! - yellow counter 3! [(12, 5)]. || OLD POSITION [7][4] || ROLL = 5 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:26:45 00:26:45 - ERROR! - yellow counter 3! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:26:46 00:26:46 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:26:51 00:26:51 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
+12/08/00:26:55 00:26:55 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:27:00 00:27:00 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:27:08 00:27:08 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:27:13 00:27:13 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:27:14 00:27:14 - ERROR! - blue counter 3! [(12, 5)]. || OLD POSITION [8][5] || ROLL = 4 | OLD_ROLL = 4 || Function try to move counter out of the board
+12/08/00:27:18 00:27:18 - ERROR! - Roll is smaller than 0!
+12/08/00:27:21 00:27:21 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:27:26 00:27:26 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 2 | OLD_ROLL = 2 || Function try to move counter out of the board
+12/08/00:27:32 00:27:32 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:27:36 00:27:36 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 6 | OLD_ROLL = 6 || Function try to move counter out of the board
+12/08/00:27:37 00:27:37 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:27:43 00:27:43 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 1 | OLD_ROLL = 1 || Function try to move counter out of the board
+12/08/00:27:48 00:27:48 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 3 | OLD_ROLL = 3 || Function try to move counter out of the board
+12/08/00:27:55 00:27:55 - ERROR! - red counter 1! [(12, 5)]. || OLD POSITION [12][5] || ROLL = 5 | OLD_ROLL = 5 || Function try to move counter out of the board
