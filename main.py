@@ -313,8 +313,11 @@ class Ludo:
         else:
             roll = self.virtual_player[self.chosen_index].roll - 1
             self.hide_roll_button = DISABLED
-
-        roll_label = Label(image=dice[roll])
+        
+        if self.dice_unknown == True:
+            roll_label =Label(image=dice_unknown)
+        else:
+            roll_label = Label(image=dice[roll])
         roll_label.grid(column=0, row=2)
 
     def next_color(self):
@@ -439,7 +442,7 @@ class Ludo:
         else:    
             second_player = self.virtual_player[self.chosen_index]
         for player in self.real_player:
-            if player.color != second_player.color and self.chosen_type == "real":
+            if player.color != second_player.color:
                 for evil_counter in player.counters:
                     for good_counter in second_player.counters:
                         if evil_counter.position[0] == good_counter.position[0] and evil_counter.position[1] == good_counter.position[1] and evil_counter.color != good_counter.color and evil_counter.position[0] != self.start_pos[evil_counter.color][0] and evil_counter.position[1] != self.start_pos[evil_counter.color][1]:
@@ -451,7 +454,7 @@ class Ludo:
                             player.in_dock += 1
                             self.error_log(self.languages["kill_1"][self.chosen_language] + " " + self.languages[player.color][self.chosen_language] + " " + self.languages["kill_2"][self.chosen_language] + " " + self.languages[second_player.color][self.chosen_language], 3, save = False)
         for player in self.virtual_player:
-            if player.color != second_player.color and self.chosen_type == "virtual":
+            if player.color != second_player.color:
                 for evil_counter in player.counters:
                     for good_counter in second_player.counters:
                         if evil_counter.position[0] == good_counter.position[0] and evil_counter.position[1] == good_counter.position[1] and evil_counter.color != good_counter.color and evil_counter.position[0] != self.start_pos[evil_counter.color][0] and evil_counter.position[1] != self.start_pos[evil_counter.color][1]:
@@ -538,7 +541,8 @@ class Ludo:
             if self.virtual_player[self.chosen_index].roll != 6:
                 self.next_color()
         self.dice_unknown = True
-        self.control_game()
+        if self.chosen_type == "real":
+            self.control_game()
 
     def adjust_counter_position(self, counter, select, color):   
         if color == "red":
@@ -552,15 +556,27 @@ class Ludo:
 
     def update_counters_pos(self):
         for x in self.real_player:
-            i = 0
-            for y in x.counters:
-                i += 1
-                self.adjust_counter_position(y, i, x.color)
+            if self.chosen_color != x.color:
+                i = 0
+                for y in x.counters:
+                    i += 1
+                    self.adjust_counter_position(y, i, x.color)
+            else:
+                current_player = x
         for x in self.virtual_player:
+            if self.chosen_color != x.color:
+                i = 0
+                for y in x.counters:
+                    i += 1
+                    self.adjust_counter_position(y, i, x.color)
+            else:
+                current_player = x
+        
+        if self.chosen_color != "":
             i = 0
-            for y in x.counters:
+            for y in current_player.counters:
                 i += 1
-                self.adjust_counter_position(y, i, x.color)
+                self.adjust_counter_position(y, i, current_player.color)      
 
     def move(self, roll, position, color, old_position):
             if roll > 0:
@@ -898,24 +914,26 @@ class Ludo:
 
     def control_game(self):
         if self.continue_game == True:
-            if self.chosen_type == "virtual":
-                self.hide_roll_button = DISABLED
-                self.hide_select_button = DISABLED
-                self.hide_radio_buttons = DISABLED
-                self.dice()
-                self.tksleep(self.default_virtual_speed)
-                self.select_counter(0)
-                self.side_panel()
-                self.tksleep(self.default_virtual_speed)
-            else:
-                self.initialization = False
-                if self.developer_mode == False:
+            while(1):
+                if self.chosen_type == "virtual":
+                    self.hide_roll_button = DISABLED
                     self.hide_select_button = DISABLED
+                    self.hide_radio_buttons = DISABLED
+                    self.dice()
+                    self.tksleep(self.default_virtual_speed)
+                    self.select_counter(0)
+                    self.side_panel()
+                    self.tksleep(self.default_virtual_speed)
                 else:
-                    self.hide_select_button = NORMAL
-                self.hide_roll_button = NORMAL
-                self.hide_radio_buttons = NORMAL
-                self.side_panel()
+                    self.initialization = False
+                    if self.developer_mode == False:
+                        self.hide_select_button = DISABLED
+                    else:
+                        self.hide_select_button = NORMAL
+                    self.hide_roll_button = NORMAL
+                    self.hide_radio_buttons = NORMAL
+                    self.side_panel()
+                    break
         else:
             self.hide_roll_button = DISABLED
             self.hide_select_button = DISABLED
