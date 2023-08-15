@@ -1,0 +1,2 @@
+15/08/15:42:34 15:42:34 - ERROR! - Cannot move green counter number[7 6]
+15/08/15:42:35 15:42:35 - ERROR! - Cannot move green counter number[7 6]
