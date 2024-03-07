@@ -1,9 +1,9 @@
 # Ludo Game in Python
 
-This game features a interface created using the Tkinter and Pillow libraries, along with SQLite3 for data storage. The game offers an extensive menu allowing players to switch between English and Polish languages. It supports up to 4 players, who can be either human or virtual opponents.
+This game features a interface created using the `tkinter` and `pillow` libraries, along with `SQLite3` for data storage. The game offers an extensive menu allowing players to switch between English and Polish languages. It supports up to 4 players, who can be either human or virtual opponents.
 
 ## Features:
-- Graphical user interface built with Tkinter and Pillow.
+- Graphical user interface built with `tkinter` and `pillow`.
 - Language switch functionality (English/Polish) in the menu.
 - Multiplayer support for up to 4 players (human or virtual).
 - Surrender option available at any point during the game.
