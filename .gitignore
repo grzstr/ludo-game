@@ -1,0 +1,6 @@
+.venv
+.idea
+.git
+__pycache__
+leaders.db
+saved_game.db

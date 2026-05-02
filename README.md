@@ -27,3 +27,34 @@ This game features a interface created using the `tkinter` and `pillow` librarie
 - Players have the option to surrender at any point during the game.
 - Save functionality allows players to interrupt a game and resume it later.
 
+## Setup
+
+### 1. Create a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+### 2. Activate the virtual environment
+
+#### macOS / Linux
+```bash
+source .venv/bin/activate
+```
+
+#### Windows
+```bat
+.venv\Scripts\activate
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run main.py
+
+```commandline
+python main.py
+```
